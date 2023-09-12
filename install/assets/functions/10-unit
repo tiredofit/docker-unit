@@ -1,28 +1,35 @@
 #!/command/with-contenv bash
 
-bootstrap_filesystem() {
-    if [ ! -d "${CONFIG_PATH}" ]; then
-        mkdir -p "${CONFIG_PATH}"
-    fi
-    if [ $(stat -c %U "${CONFIG_PATH}") != "unit" ] ; then chown -R unit:unit "${CONFIG_PATH}" ; fi
-    # Only necessary if you want to map some legacy directories
-    #if [ ! -d "/etc/randomconfig" ] ; then
-    #    ln -sf "${CONFIG_PATH}" /etc/randomconfig
-    #fi
+unit_configure_instance() {
+    :
+}
 
-    if [ ! -d "${DATA_PATH}" ]; then
-        mkdir -p "${DATA_PATH}"
-    fi
-    if [ $(stat -c %U "") != "unit" ] ; then chown unit:unit "${DATA_PATH}" ; fi
+unit_configure_logging() {
+    mkdir -p "${UNIT_LOG_PATH}"
+    touch "${UNIT_LOG_PATH}"/"${UNIT_LOG_FILE}"
+    chown -R "${UNIT_USER}":"${UNIT_GROUP}" "${UNIT_LOG_PATH}"/"${UNIT_LOG_FILE}"
 
-    if [ ! -d "${LOG_PATH}" ]; then
-        mkdir -p "${LOG_PATH}"
-    fi
-    if [ $(stat -c %U "${LOG_PATH}") != "unit" ] ; then chown -R unit:unit "${LOG_PATH}" ; fi
+    create_logrotate unit "${UNIT_LOG_PATH}"/"${UNIT_LOG_FILE}" "${UNIT_USER}" "${UNIT_GROUP}"
+}
 
-    case "${LOG_TYPE,,}" in
-        file )
-            create_logrotate unit "${LOG_PATH}"/"${LOG_FILE}" unit unit
-        ;;
-    esac
+unit_create_sample_html() {
+    if [ ! -f "${UNIT_WEBROOT}/index.html" ]; then
+        print_notice "Creating sample index.html"
+        mkdir -p "${UNIT_WEBROOT}"
+        cat <<EOF >"${UNIT_WEBROOT}"/index.html
+<html>
+<title>Default Page</title>
+<h2>Container is working</h2>
+Congratulations! Your ${IMAGE_NAME} image is working. You are seeing this because you don't have an index.html file in your ${UNIT_WEBROOT} directory.
+</html>
+EOF
+        chown -R "${UNIT_USER}":"${UNIT_GROUP}" "${UNIT_WEBROOT}"
+    fi
+}
+
+unit_post_init() {
+    mkdir -p "${UNIT_WEBROOT}"
+    if var_true "${UNIT_FORCE_RESET_PERMISSIONS}" ; then
+        chown -R "${UNIT_USER}":"${UNIT_GROUP}" "${UNIT_WEBROOT}"
+    fi
 }

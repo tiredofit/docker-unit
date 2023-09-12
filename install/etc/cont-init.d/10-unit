@@ -4,4 +4,18 @@ source /assets/functions/00-container
 prepare_service
 PROCESS_NAME="unit"
 
+if [ ! -f "/tmp/.container/container-restart" ] ; then
+    unit_configure_logging
+    if [ "${SETUP_TYPE,,}" = "auto" ]; then
+        unit_configure_instance
+        if var_true "${UNIT_ENABLE_APPLICATION_CONFIGURATION}"; then
+            unit_configure_site_default
+            if var_true "${UNIT_ENABLE_CREATE_SAMPLE_HTML}" ; then unit_create_sample_html ; fi
+        else
+            print_notice "Not configurating Website configuration files"
+        fi
+    fi
+    unit_post_init
+fi
+
 liftoff

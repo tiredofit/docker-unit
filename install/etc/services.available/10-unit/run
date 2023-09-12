@@ -7,10 +7,21 @@ prepare_service defaults single
 check_container_initialized
 check_service_initialized init
 
+case "${UNIT_CONTROL_TYPE,,}" in
+    ip)
+        _control="${UNIT_CONTROL_IP}"
+    ;;
+    socket)
+        _control="unix:/${UNIT_CONTROL_SOCKET}"
+    ;;
+esac
+
 liftoff
 
 print_start "Starting unit ${UNIT_VERSION}"
 silent exec unitd \
+                --control "${_control}"
                 --user "${UNIT_USER}" \
                 --group "${UNIT_GROUP}" \
+
                 --no-daemon ${UNIT_OPTS}
