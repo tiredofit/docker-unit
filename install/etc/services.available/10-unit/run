@@ -7,24 +7,6 @@ prepare_service defaults single
 check_container_initialized
 check_service_initialized init
 
-case "${UNIT_CONTROL_TYPE,,}" in
-    ip)
-        _unit_control="${UNIT_CONTROL_IP}:${UNIT_CONTROL_PORT}"
-    ;;
-    socket)
-        _unit_control="unix:/${UNIT_CONTROL_SOCKET_PATH}/${UNIT_CONTROL_SOCKET_NAME}"
-    ;;
-esac
-
-case "${UNIT_LOG_TYPE,,}" in
-    console)
-        SHOW_OUTPUT=TRUE
-    ;;
-    file)
-        _unit_log="${LOG_PATH}/"${LOG_FILE}"
-    ;;
-esac
-
 liftoff
 
 print_start "Starting unit ${UNIT_VERSION}"
