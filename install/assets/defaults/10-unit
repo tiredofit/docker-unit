@@ -41,6 +41,6 @@ case "${UNIT_LOG_TYPE,,}" in
         SHOW_OUTPUT=TRUE
     ;;
     file)
-        _unit_log="${LOG_PATH}/"${LOG_FILE}"
+        _unit_log="${LOG_PATH}/${LOG_FILE}"
     ;;
 esac
