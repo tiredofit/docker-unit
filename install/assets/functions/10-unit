@@ -16,7 +16,7 @@ unit_bootstrap_filesystem() {
     fi
     if [ $(stat -c %U "${UNIT_MODULE_PATH}") != "${UNIT_USER}" ] ; then silent chown "${UNIT_USER}":"${UNIT_GROUP}" "${UNIT_MODULE_PATH}" ; fi
 
-    if [ -n "${UNIT_LOG_TYPE,,}" = "file" ]; then
+    if [ "${UNIT_LOG_TYPE,,}" = "file" ]; then
         if [ ! -d "${UNIT_LOG_PATH}" ]; then
             mkdir -p "${UNIT_LOG_PATH}"
         fi
