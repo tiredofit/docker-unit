@@ -9,7 +9,7 @@ unit_bootstrap_filesystem() {
         if [ "$(stat -c %U "${UNIT_LOG_PATH}")" != "${UNIT_USER}" ] ; then chown "${UNIT_USER}":"${UNIT_GROUP}" "${UNIT_LOG_PATH}" ; fi
         touch "${UNIT_LOG_PATH}"/"${UNIT_LOG_FILE}"
         chown -R "${UNIT_USER}":"${UNIT_GROUP}" "${UNIT_LOG_PATH}"/"${UNIT_LOG_FILE}"
-        create_logrotate unit "${UNIT_LOG_PATH}"/"${UNIT_LOG_FILE}" "${UNIT_USER}" "${UNIT_GROUP}"
+        create_logrotate unit "${UNIT_LOG_PATH}"/"${UNIT_LOG_FILE}" unit-"${UNIT_LOG_FORMAT,,}" "${UNIT_USER}" "${UNIT_GROUP}"
     fi
 
     if [ ! -d "${UNIT_MODULE_PATH}" ]; then
@@ -29,7 +29,7 @@ unit_bootstrap_filesystem() {
 }
 
 unit_configure_instance() {
-    :
+    _unit_configure_log_format() {
 }
 
 unit_create_sample_html() {
