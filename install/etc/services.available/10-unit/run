@@ -9,10 +9,19 @@ check_service_initialized init
 
 case "${UNIT_CONTROL_TYPE,,}" in
     ip)
-        _control="${UNIT_CONTROL_IP}"
+        _unit_control="${UNIT_CONTROL_IP}"
     ;;
     socket)
-        _control="unix:/${UNIT_CONTROL_SOCKET}"
+        _unit_control="unix:/${UNIT_CONTROL_SOCKET}"
+    ;;
+esac
+
+case "${UNIT_LOG_TYPE,,}" in
+    console)
+        SHOW_OUTPUT=TRUE
+    ;;
+    file)
+        _unit_log="${LOG_PATH}/"${LOG_FILE}"
     ;;
 esac
 
@@ -20,8 +29,8 @@ liftoff
 
 print_start "Starting unit ${UNIT_VERSION}"
 silent exec unitd \
-                --control "${_control}"
+                --control "${_unit_control}" \
                 --user "${UNIT_USER}" \
                 --group "${UNIT_GROUP}" \
-
-                --no-daemon ${UNIT_OPTS}
+                --no-daemon ${_unit_log} \
+                --tmp "${UNIT_TMP_PATH}" $${UNIT_OPTS}
