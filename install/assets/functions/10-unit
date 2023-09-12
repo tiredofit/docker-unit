@@ -11,27 +11,25 @@ unit_bootstrap_filesystem() {
     fi
     if [ $(stat -c %U "${UNIT_SOCKET_PATH}") != "${UNIT_USER}" ] ; then silent chown "${UNIT_USER}":"${UNIT_GROUP}" "${UNIT_SOCKET_PATH}" ; fi
 
-    if [ ! -d "${UNIT_LOG_PATH}" ] && [ -n "${_unit_log}" ]; then
-        mkdir -p "${UNIT_LOG_PATH}"
+    if [ ! -d "${UNIT_MODULE_PATH}" ]; then
+        mkdir -p "${UNIT_MODULE_PATH}"
     fi
-    if [ $(stat -c %U "${UNIT_LOG_PATH}") != "${UNIT_USER}" ] ; then chown "${UNIT_USER}":"${UNIT_GROUP}" "${UNIT_LOG_PATH}" ; fi
+    if [ $(stat -c %U "${UNIT_MODULE_PATH}") != "${UNIT_USER}" ] ; then silent chown "${UNIT_USER}":"${UNIT_GROUP}" "${UNIT_MODULE_PATH}" ; fi
 
-    if [ ! -d "${CONFIG_PATH}" ]; then
-        mkdir -p "${CONFIG_PATH}"
+    if [ -n "${UNIT_LOG_TYPE,,}" = "file" ]; then
+        if [ ! -d "${UNIT_LOG_PATH}" ]; then
+            mkdir -p "${UNIT_LOG_PATH}"
+        fi
+
+        if [ $(stat -c %U "${UNIT_LOG_PATH}") != "${UNIT_USER}" ] ; then chown "${UNIT_USER}":"${UNIT_GROUP}" "${UNIT_LOG_PATH}" ; fi
+        touch "${UNIT_LOG_PATH}"/"${UNIT_LOG_FILE}"
+        chown -R "${UNIT_USER}":"${UNIT_GROUP}" "${UNIT_LOG_PATH}"/"${UNIT_LOG_FILE}"
+        create_logrotate unit "${UNIT_LOG_PATH}"/"${UNIT_LOG_FILE}" "${UNIT_USER}" "${UNIT_GROUP}"
     fi
-    if [ $(stat -c %U "${CONFIG_PATH}") != "${UNIT_USER}" ] ; then chown -R unit:unit "${CONFIG_PATH}" ; fi
 }
 
 unit_configure_instance() {
     :
-}
-
-unit_configure_logging() {
-    mkdir -p "${UNIT_LOG_PATH}"
-    touch "${UNIT_LOG_PATH}"/"${UNIT_LOG_FILE}"
-    chown -R "${UNIT_USER}":"${UNIT_GROUP}" "${UNIT_LOG_PATH}"/"${UNIT_LOG_FILE}"
-
-    create_logrotate unit "${UNIT_LOG_PATH}"/"${UNIT_LOG_FILE}" "${UNIT_USER}" "${UNIT_GROUP}"
 }
 
 unit_create_sample_html() {

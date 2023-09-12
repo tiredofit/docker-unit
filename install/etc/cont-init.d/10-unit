@@ -5,7 +5,7 @@ prepare_service
 PROCESS_NAME="unit"
 
 if [ ! -f "/tmp/.container/container-restart" ] ; then
-    unit_configure_logging
+    unit_bootstrap_filesystem
     if [ "${SETUP_TYPE,,}" = "auto" ]; then
         unit_configure_instance
         if var_true "${UNIT_ENABLE_APPLICATION_CONFIGURATION}"; then
