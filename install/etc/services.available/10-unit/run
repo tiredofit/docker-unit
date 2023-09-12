@@ -12,7 +12,7 @@ case "${UNIT_CONTROL_TYPE,,}" in
         _unit_control="${UNIT_CONTROL_IP}:${UNIT_CONTROL_PORT}"
     ;;
     socket)
-        _unit_control="unix:/${UNIT_CONTROL_SOCKET}"
+        _unit_control="unix:/${UNIT_CONTROL_SOCKET_PATH}/${UNIT_CONTROL_SOCKET_NAME}"
     ;;
 esac
 
