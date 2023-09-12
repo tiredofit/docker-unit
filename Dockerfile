@@ -18,9 +18,10 @@ RUN source assets/functions/00-container && \
     set -x && \
     adduser -D -S -s /sbin/nologin \
             -h /var/lib/unit \
-            -G www-data \
-            -g "www-data" \
-            -u 80 unit \
+            -G "${UNIT_GROUP}" \
+            -g "${UNIT_GROUP}" \
+            -u 80 \
+            "${UNIT_USER}" \
             && \
     \
     package update && \
