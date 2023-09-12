@@ -9,6 +9,8 @@ check_service_initialized init
 
 liftoff
 
-print_start "Starting unit ${unit_VERSION}"
-silent exec setuidgid ${UNIT_USER} \
-                                    unit  ${APP_OPTS}
+print_start "Starting unit ${UNIT_VERSION}"
+silent exec unitd \
+                --user "${UNIT_USER}" \
+                --group "${UNIT_GROUP}" \
+                --no-daemon ${UNIT_OPTS}
