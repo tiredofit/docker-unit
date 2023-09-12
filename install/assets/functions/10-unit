@@ -1,0 +1,28 @@
+#!/command/with-contenv bash
+
+bootstrap_filesystem() {
+    if [ ! -d "${CONFIG_PATH}" ]; then
+        mkdir -p "${CONFIG_PATH}"
+    fi
+    if [ $(stat -c %U "${CONFIG_PATH}") != "unit" ] ; then chown -R unit:unit "${CONFIG_PATH}" ; fi
+    # Only necessary if you want to map some legacy directories
+    #if [ ! -d "/etc/randomconfig" ] ; then
+    #    ln -sf "${CONFIG_PATH}" /etc/randomconfig
+    #fi
+
+    if [ ! -d "${DATA_PATH}" ]; then
+        mkdir -p "${DATA_PATH}"
+    fi
+    if [ $(stat -c %U "") != "unit" ] ; then chown unit:unit "${DATA_PATH}" ; fi
+
+    if [ ! -d "${LOG_PATH}" ]; then
+        mkdir -p "${LOG_PATH}"
+    fi
+    if [ $(stat -c %U "${LOG_PATH}") != "unit" ] ; then chown -R unit:unit "${LOG_PATH}" ; fi
+
+    case "${LOG_TYPE,,}" in
+        file )
+            create_logrotate unit "${LOG_PATH}"/"${LOG_FILE}" unit unit
+        ;;
+    esac
+}
