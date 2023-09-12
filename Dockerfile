@@ -46,11 +46,11 @@ RUN source assets/functions/00-container && \
 		--pid="/run/unit.pid" \
 		--log="/var/log/unit/unit.log" \
 		--mandir=/usr/src/unit.tmp \
-        --tmpdir=/tmp \
 		--modulesdir="/usr/lib/unit/modules" \
+        --tmpdir=/tmp \
 		#--openssl \
-		--user=${UNIT_USER} \
-		--group=${UNIT_GROUP} \
+		--user="${UNIT_USER}" \
+		--group="${UNIT_GROUP}" \
 		--tests \
         && \
 	make -j $(nproc) && \

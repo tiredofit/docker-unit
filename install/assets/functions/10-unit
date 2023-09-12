@@ -1,5 +1,27 @@
 #!/command/with-contenv bash
 
+unit_bootstrap_filesystem() {
+    if [ ! -d "${UNIT_STATE_PATH}" ]; then
+        mkdir -p "${UNIT_STATE_PATH}"
+    fi
+    if [ $(stat -c %U "${UNIT_STATE_PATH}") != "${UNIT_USER}" ] ; then chown "${UNIT_USER}":"${UNIT_GROUP}" "${UNIT_STATE_PATH}" ; fi
+
+    if [ ! -d "${UNIT_SOCKET_PATH}" ]; then
+        mkdir -p "${UNIT_SOCKET_PATH}"
+    fi
+    if [ $(stat -c %U "${UNIT_SOCKET_PATH}") != "${UNIT_USER}" ] ; then silent chown "${UNIT_USER}":"${UNIT_GROUP}" "${UNIT_SOCKET_PATH}" ; fi
+
+    if [ ! -d "${UNIT_LOG_PATH}" ] && [ -n "${_unit_log}" ]; then
+        mkdir -p "${UNIT_LOG_PATH}"
+    fi
+    if [ $(stat -c %U "${UNIT_LOG_PATH}") != "${UNIT_USER}" ] ; then chown "${UNIT_USER}":"${UNIT_GROUP}" "${UNIT_LOG_PATH}" ; fi
+
+    if [ ! -d "${CONFIG_PATH}" ]; then
+        mkdir -p "${CONFIG_PATH}"
+    fi
+    if [ $(stat -c %U "${CONFIG_PATH}") != "${UNIT_USER}" ] ; then chown -R unit:unit "${CONFIG_PATH}" ; fi
+}
+
 unit_configure_instance() {
     :
 }

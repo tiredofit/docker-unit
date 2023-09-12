@@ -15,5 +15,6 @@ silent exec unitd \
                 --user "${UNIT_USER}" \
                 --group "${UNIT_GROUP}" \
                 --no-daemon ${_unit_log} \
-                --state "${UNIT_STATE_PATH}" \
-                --tmp "${UNIT_TMP_PATH}" $${UNIT_OPTS}
+                --modulesdir "${UNIT_MODULE_PATH}" \
+                --statedir "${UNIT_STATE_PATH}" \
+                --tmpdir "${UNIT_TMP_PATH}" ${UNIT_OPTS}
