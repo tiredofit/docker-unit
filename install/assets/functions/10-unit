@@ -9,7 +9,6 @@ unit_bootstrap_filesystem() {
         if [ "$(stat -c %U "${UNIT_LOG_PATH}")" != "${UNIT_USER}" ] ; then chown "${UNIT_USER}":"${UNIT_GROUP}" "${UNIT_LOG_PATH}" ; fi
         touch "${UNIT_LOG_PATH}"/"${UNIT_LOG_FILE}"
         chown -R "${UNIT_USER}":"${UNIT_GROUP}" "${UNIT_LOG_PATH}"/"${UNIT_LOG_FILE}"
-        create_logrotate unit "${UNIT_LOG_PATH}"/"${UNIT_LOG_FILE}" unit-"${UNIT_LOG_FORMAT,,}" "${UNIT_USER}" "${UNIT_GROUP}"
     fi
 
     if [ ! -d "${UNIT_MODULE_PATH}" ]; then
@@ -30,6 +29,38 @@ unit_bootstrap_filesystem() {
 
 unit_configure_instance() {
     _unit_configure_log_format() {
+        print_debug "Updating logformat settings"
+        case "${UNIT_LOG_TYPE}" in
+            console)
+                yq -iP '.access_log.path="/dev/stdout"' /etc/unit/snippets/logformat/${UNIT_LOG_FORMAT,,}.json -o json
+            ;;
+            file)
+                yq -iP '.access_log.path="'$(echo "${UNIT_LOG_PATH}"/"${UNIT_LOG_FILE}")'"' /etc/unit/snippets/logformat/${UNIT_LOG_FORMAT,,}.json -o json
+                create_logrotate unit "${UNIT_LOG_PATH}"/"${UNIT_LOG_FILE}" unit-"${UNIT_LOG_FORMAT,,}" "${UNIT_USER}" "${UNIT_GROUP}"
+            ;;
+            none)
+                yq -iP '.access_log.path="/dev/null"' /etc/unit/snippets/logformat/${UNIT_LOG_FORMAT,,}.json -o json
+            ;;
+        esac
+    }
+
+    _unit_configure_settings() {
+        print_debug "Updating unit.json settings"
+        yq -iP  '
+                    .http.body_read_timeout = env(UNIT_TIMEOUT_BODY_READ)
+                    .http.header_read_timeout = env(UNIT_TIMEOUT_HEADER_READ)
+                    .http.idle_timeout = env(UNIT_TIMEOUT_IDLE)
+                    .http.send_timeout = env(UNIT_TIMEOUT_BODY_SEND)
+                    .http.max_body_size = env(UNIT_MAX_BODY_SIZE)
+                    .http.discard_unsafe_fields = env(UNIT_DISCARD_UNSAFE_FIELDS)
+                    .http.log_route = env(UNIT_LOG_ROUTES)
+                    .http.server_version = env(UNIT_ENABLE_SERVER_VERSION)
+                ' /etc/unit/snippets/unit.json -o json
+    }
+
+    _unit_configure_log_format
+    _unit_configure_settings
+
 }
 
 unit_create_sample_html() {
