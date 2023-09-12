@@ -17,7 +17,7 @@ ENV UNIT_VERSION=1.31.0-1 \
 RUN source assets/functions/00-container && \
     set -x && \
     adduser -D -S -s /sbin/nologin \
-            -h /dev/null \
+            -h /var/lib/unit \
             -G www-data \
             -g "www-data" \
             -u 80 unit \
@@ -47,7 +47,7 @@ RUN source assets/functions/00-container && \
 		--log="/var/log/unit/unit.log" \
 		--mandir=/usr/src/unit.tmp \
         --tmpdir=/tmp \
-		--modulesdir="$_modules_dir" \
+		--modulesdir="/usr/lib/unit/modules" \
 		#--openssl \
 		--user=${UNIT_USER} \
 		--group=${UNIT_GROUP} \
