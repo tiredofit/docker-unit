@@ -9,7 +9,7 @@ check_service_initialized init
 
 case "${UNIT_CONTROL_TYPE,,}" in
     ip)
-        _unit_control="${UNIT_CONTROL_IP}"
+        _unit_control="${UNIT_CONTROL_IP}:${UNIT_CONTROL_PORT}"
     ;;
     socket)
         _unit_control="unix:/${UNIT_CONTROL_SOCKET}"
