@@ -47,14 +47,14 @@ unit_configure_instance() {
     _unit_configure_settings() {
         print_debug "Updating unit.json settings"
         yq -iP  '
-                    .http.body_read_timeout = env(UNIT_TIMEOUT_BODY_READ)
-                    .http.header_read_timeout = env(UNIT_TIMEOUT_HEADER_READ)
-                    .http.idle_timeout = env(UNIT_TIMEOUT_IDLE)
-                    .http.send_timeout = env(UNIT_TIMEOUT_BODY_SEND)
-                    .http.max_body_size = env(UNIT_MAX_BODY_SIZE)
-                    .http.discard_unsafe_fields = env(UNIT_DISCARD_UNSAFE_FIELDS)
-                    .http.log_route = env(UNIT_LOG_ROUTES)
-                    .http.server_version = env(UNIT_ENABLE_SERVER_VERSION)
+                    .http.body_read_timeout = env(UNIT_TIMEOUT_BODY_READ) |
+                    .http.header_read_timeout = env(UNIT_TIMEOUT_HEADER_READ) |
+                    .http.idle_timeout = env(UNIT_TIMEOUT_IDLE) |
+                    .http.send_timeout = env(UNIT_TIMEOUT_BODY_SEND) |
+                    .http.max_body_size = env(UNIT_MAX_BODY_SIZE) |
+                    .http.discard_unsafe_fields = env(UNIT_DISCARD_UNSAFE_FIELDS) |
+                    .http.log_route = env(UNIT_LOG_ROUTES) |
+                    .http.server_version = env(UNIT_ENABLE_SERVER_VERSION) |
                 ' /etc/unit/snippets/unit.json -o json
     }
 
@@ -62,6 +62,33 @@ unit_configure_instance() {
     _unit_configure_settings
 
 }
+
+unit_configure_site_default() {
+    if [ -z "${UNIT_SITE_ENABLED}" ] && [ ! -f "/etc/unit/sites.available/default.json" ] ; then
+        yq -nP  '
+                    .listeners."'$(echo "${LISTEN_IP}:${LISTEN_PORT}")'".pass="'$(echo "${UNIT_APPLICATION_NAME}")'" |
+                    .[strenv(UNIT_APPLICATION_NAME)].action.share = "'$(echo "${UNIT_WEBROOT}")'/$uri" |
+                    .listeners."'$(echo "${LISTEN_IP}:${LISTEN_PORT}")'".pass="'$(echo "${UNIT_APPLICATION_NAME}")'"
+                ' -o json > /etc/unit/sites.available/default.json
+#{
+#    "listeners": {
+#        "127.0.0.1:8080": {
+#            "pass": "routes"
+#        }
+#    },
+#
+#    "routes": [
+#        {
+#            "action": {
+#                "share": "/www/data$uri"
+#            }
+#        }
+#    ]
+#}
+
+        #cat <<EOF > /etc/nginx/sites.available/default.json
+}
+
 
 unit_create_sample_html() {
     if [ ! -f "${UNIT_WEBROOT}/index.html" ]; then
