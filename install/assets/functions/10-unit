@@ -73,7 +73,7 @@ unit_configure_instance() {
                     .http.max_body_size = env(UNIT_MAX_BODY_SIZE) |
                     .http.discard_unsafe_fields = env(UNIT_DISCARD_UNSAFE_FIELDS) |
                     .http.log_route = env(UNIT_LOG_ROUTES) |
-                    .http.server_version = env(UNIT_ENABLE_SERVER_VERSION) |
+                    .http.server_version = env(UNIT_ENABLE_SERVER_VERSION)
                 ' /etc/unit/snippets/unit.json -o json
     }
 
