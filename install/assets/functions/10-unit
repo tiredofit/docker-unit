@@ -84,10 +84,27 @@ unit_configure_instance() {
 
 unit_configure_site_default() {
     if [ -z "${UNIT_SITE_ENABLED}" ] && [ ! -f "/etc/unit/sites.available/default.json" ] ; then
-        yq -nP  '
-                    .listeners."'$(echo "${LISTEN_IP}:${LISTEN_PORT}")'".pass="'$(echo "${UNIT_APPLICATION_NAME}")'" |
-                    .[strenv(UNIT_APPLICATION_NAME)].action.share = "'$(echo "${UNIT_WEBROOT}")'/$uri"
-                ' -o json > /etc/unit/sites.available/default.json
+        cat <<EOF > /etc/unit/sites.available/default.json
+{
+  "listeners": {
+    "${UNIT_LISTEN_IP}:${UNIT_LISTEN_PORT}": {
+      "pass": "routes"
+    }
+  },
+  "routes": [
+    {
+      "action": {
+        "share": "${UNIT_WEBROOT}/$uri"
+      }
+    }
+  ]
+}
+EOF
+        # Not entirely working yet
+        #yq -nP  '
+        #            .listeners."'$(echo "${UNIT_LISTEN_IP}:${UNIT_LISTEN_PORT}")'".pass="routes" |
+        #            .routes.action.share = "'$(echo "${UNIT_WEBROOT}")'/$uri"
+        #        ' -o json > /etc/unit/sites.available/default.json
     fi
 }
 
@@ -112,4 +129,11 @@ unit_post_init() {
     if var_true "${UNIT_FORCE_RESET_PERMISSIONS}" ; then
         chown -R "${UNIT_USER}":"${UNIT_GROUP}" "${UNIT_WEBROOT}"
     fi
+
+    cat <<EOF >> /root/.bashrc
+
+    unit_import() {
+        curl -x PUT --data-binary @${1} --unix-socket "${_unit_control}" http://localhost/config
+    }
+EOF
 }
