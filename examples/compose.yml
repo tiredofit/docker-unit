@@ -1,0 +1,22 @@
+services:
+  unit-app:
+    image: tiredofit/unit:latest
+    container_name: unit-app
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.unit-app.rule=Host(`unit.example.com`)
+      - traefik.http.services.unit-app.loadbalancer.server.port=8080
+    volumes:
+      - ./data:/www/html
+      - ./logs:/var/log/unit
+    environment:
+      - TIMEZONE=America/Vancouver
+      - CONTAINER_NAME=unit-app
+      - CONTAINER_LOG_LEVEL=INFO
+    networks:
+      - proxy
+    restart: always
+
+networks:
+  proxy:
+    external: true
