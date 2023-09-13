@@ -129,7 +129,7 @@ unit_site_enable() {
         if [ "${1,,}" = "all" ] ; then
             if [ "$(ls -A /etc/unit/sites.available/)" ]; then
                 shopt -s nullglob
-                for site in /etc/unit/sites.available/*.conf; do
+                for site in /etc/unit/sites.available/*.json; do
                     print_debug "Enabling Unit Site '$(basename "${site}")'"
                     ln -sf /etc/unit/sites.available/"$(basename "${site}")" /etc/unit/sites.enabled/
                 done
@@ -137,15 +137,15 @@ unit_site_enable() {
             fi
         else
             if [ -f "/etc/unit/sites.available/${1}.conf" ]; then
-                print_debug "Enabling Unit Site '${1}.conf'"
-                ln -sf /etc/nginx/unit.available/"${1}".conf /etc/unit/sites.enabled
+                print_debug "Enabling Unit Site '${1}.json'"
+                ln -sf /etc/nginx/unit.available/"${1}".json /etc/unit/sites.enabled
             else
                 print_error "Cannot enable site ${1} as it doesn't exist in /etc/unit/sites.available!"
                 exit 1
             fi
         fi
     else
-        print_error "Need configuration file as argument to utilize 'unit_site_enable' function"
+        print_error "Need json configuration file as argument to utilize 'unit_site_enable' function"
     fi
 }
 
@@ -153,14 +153,14 @@ unit_site_disable() {
     if [ -n "${1}" ]; then
         if [ "${1,,}" = "all" ] ; then
             shopt -s nullglob
-            for site in /etc/unit/sites.enabled/*.conf; do
+            for site in /etc/unit/sites.enabled/*.json; do
                 print_debug "Disabling Unit Site '$(basename "${site}")"
                 rm -rf /etc/unit/sites.enabled/"$(basename "${site}")"
             done
             shopt -u nullglob
         else
-            if [ -f "/etc/unit/sites.enabled/${1}.conf" ]; then
-                print_debug "Disabling Unit Site '${1}.conf'"
+            if [ -f "/etc/unit/sites.enabled/${1}.json" ]; then
+                print_debug "Disabling Unit Site '${1}.json'"
                 rm -rf /etc/unit/sites.enabled/"${1}"*
             else
                 print_error "Cannot disable site ${1} as it doesn't exist in /etc/unit/sites.enabled!"
@@ -173,6 +173,7 @@ unit_site_disable() {
 }
 
 unit_post_init() {
+    set -x
     if var_true "${UNIT_ENABLE_APPLICATION_CONFIGURATION}" ; then
         if [ -n "${UNIT_SITE_ENABLED}" ] ; then
             if [ "${UNIT_SITE_ENABLED,,}" != "null" ] ; then
@@ -220,4 +221,5 @@ unit_post_init() {
         curl -X PUT --data-binary @\${1} --unix-socket "${_unit_control}" http://localhost/config
     }
 EOF
+set +x
 }
