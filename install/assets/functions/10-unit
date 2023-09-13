@@ -173,7 +173,6 @@ unit_site_disable() {
 }
 
 unit_post_init() {
-    set -x
     if var_true "${UNIT_ENABLE_APPLICATION_CONFIGURATION}" ; then
         if [ -n "${UNIT_SITE_ENABLED}" ] ; then
             if [ "${UNIT_SITE_ENABLED,,}" != "null" ] ; then
@@ -221,5 +220,4 @@ unit_post_init() {
         curl -X PUT --data-binary @\${1} --unix-socket "${_unit_control}" http://localhost/config
     }
 EOF
-set +x
 }
