@@ -11,6 +11,18 @@ unit_bootstrap_filesystem() {
         chown -R "${UNIT_USER}":"${UNIT_GROUP}" "${UNIT_LOG_PATH}"/"${UNIT_LOG_FILE}"
     fi
 
+    if [ "${UNIT_LOG_ACCESS_TYPE,,}" = "file" ]; then
+        if [ "${UNIT_LOG_ACCESS_PATH}" != "${UNIT_LOG_PATH}" ] && [ "${UNIT_LOG_ACCESS_TYPE,,}" != "none" ]; then
+            if [ ! -d "${UNIT_LOG_ACCESS_PATH}" ]; then
+                mkdir -p "${UNIT_LOG_ACCESS_PATH}"
+            fi
+
+            if [ "$(stat -c %U "${UNIT_LOG_ACCESS_PATH}")" != "${UNIT_USER}" ] ; then chown "${UNIT_USER}":"${UNIT_GROUP}" "${UNIT_LOG_ACCESS_PATH}" ; fi
+            touch "${UNIT_LOG_ACCESS_PATH}"/"${UNIT_LOG_ACCESS_FILE}"
+            chown -R "${UNIT_USER}":"${UNIT_GROUP}" "${UNIT_LOG_ACCESSPATH}"/"${UNIT_LOG_ACCESS_FILE}"
+        fi
+    fi
+
     if [ ! -d "${UNIT_MODULE_PATH}" ]; then
         mkdir -p "${UNIT_MODULE_PATH}"
     fi
@@ -31,15 +43,22 @@ unit_configure_instance() {
     _unit_configure_log_format() {
         print_debug "Updating logformat settings"
         case "${UNIT_LOG_TYPE}" in
+            file)
+                yq -iP '.access_log.path="'$(echo "${UNIT_LOG_ACCESS_PATH}"/"${UNIT_LOG_ACCESS_FILE}")'"' /etc/unit/snippets/logformat/${UNIT_LOG_ACCESS_FORMAT,,}.json -o json
+                create_logrotate unit "${UNIT_LOG_ACCESS_PATH}"/"${UNIT_LOG_ACCESS_FILE}" unit "${UNIT_USER}" "${UNIT_GROUP}"
+            ;;
+        esac
+
+        case "${UNIT_LOG_ACCESS_TYPE}" in
             console)
-                yq -iP '.access_log.path="/dev/stdout"' /etc/unit/snippets/logformat/${UNIT_LOG_FORMAT,,}.json -o json
+                yq -iP '.access_log.path="/dev/stdout"' /etc/unit/snippets/logformat/${UNIT_LOG_ACCESS_FORMAT,,}.json -o json
             ;;
             file)
-                yq -iP '.access_log.path="'$(echo "${UNIT_LOG_PATH}"/"${UNIT_LOG_FILE}")'"' /etc/unit/snippets/logformat/${UNIT_LOG_FORMAT,,}.json -o json
-                create_logrotate unit "${UNIT_LOG_PATH}"/"${UNIT_LOG_FILE}" unit-"${UNIT_LOG_FORMAT,,}" "${UNIT_USER}" "${UNIT_GROUP}"
+                yq -iP '.access_log.path="'$(echo "${UNIT_LOG_ACCESS_PATH}"/"${UNIT_LOG_ACCESS_FILE}")'"' /etc/unit/snippets/logformat/${UNIT_LOG_ACCESS_FORMAT,,}.json -o json
+                create_logrotate unit-access "${UNIT_LOG_ACCESS_PATH}"/"${UNIT_LOG_ACCESS_FILE}" unit-access-"${UNIT_LOG_ACCESS_FORMAT,,}" "${UNIT_USER}" "${UNIT_GROUP}"
             ;;
             none)
-                yq -iP '.access_log.path="/dev/null"' /etc/unit/snippets/logformat/${UNIT_LOG_FORMAT,,}.json -o json
+                yq -iP '.access_log.path="/dev/null"' /etc/unit/snippets/logformat/${UNIT_LOG_ACCESS_FORMAT,,}.json -o json
             ;;
         esac
     }
@@ -67,26 +86,9 @@ unit_configure_site_default() {
     if [ -z "${UNIT_SITE_ENABLED}" ] && [ ! -f "/etc/unit/sites.available/default.json" ] ; then
         yq -nP  '
                     .listeners."'$(echo "${LISTEN_IP}:${LISTEN_PORT}")'".pass="'$(echo "${UNIT_APPLICATION_NAME}")'" |
-                    .[strenv(UNIT_APPLICATION_NAME)].action.share = "'$(echo "${UNIT_WEBROOT}")'/$uri" |
-                    .listeners."'$(echo "${LISTEN_IP}:${LISTEN_PORT}")'".pass="'$(echo "${UNIT_APPLICATION_NAME}")'"
+                    .[strenv(UNIT_APPLICATION_NAME)].action.share = "'$(echo "${UNIT_WEBROOT}")'/$uri"
                 ' -o json > /etc/unit/sites.available/default.json
-#{
-#    "listeners": {
-#        "127.0.0.1:8080": {
-#            "pass": "routes"
-#        }
-#    },
-#
-#    "routes": [
-#        {
-#            "action": {
-#                "share": "/www/data$uri"
-#            }
-#        }
-#    ]
-#}
-
-        #cat <<EOF > /etc/nginx/sites.available/default.json
+    fi
 }
 
 
