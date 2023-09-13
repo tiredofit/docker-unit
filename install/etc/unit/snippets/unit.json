@@ -1,15 +1,15 @@
 {
-    "settings": {
-      "http": {
-        "header_read_timeout": 30,
-        "body_read_timeout": 30,
-        "send_timeout": 30,
-        "idle_timeout": 30,
-        "max_body_size": 8388608,
+  "settings": {
+    "http": {
+      "header_read_timeout": 30,
+      "body_read_timeout": 30,
+      "send_timeout": 30,
+      "idle_timeout": 30,
+      "max_body_size": 8388608,
 
-        "discard_unsafe_fields": true,
-        "log_route": false,
-        "server_version": true,
-      }
+      "discard_unsafe_fields": true,
+      "log_route": false,
+      "server_version": true
     }
   }
+}
