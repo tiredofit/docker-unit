@@ -94,7 +94,7 @@ unit_configure_site_default() {
   "routes": [
     {
       "action": {
-        "share": "${UNIT_WEBROOT}/$uri"
+        "share": "${UNIT_WEBROOT}/\$uri"
       }
     }
   ]
