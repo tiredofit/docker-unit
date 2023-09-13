@@ -214,10 +214,16 @@ unit_post_init() {
         chown -R "${UNIT_USER}":"${UNIT_GROUP}" "${UNIT_WEBROOT}"
     fi
 
+    if [ "${UNIT_CONTROL_TYPE,,}" = "socket" ]; then
+        _unit_control="$(echo "${_unit_control}" | sed "s|unix:/||g")"
+    fi
+
     cat <<EOF >> /root/.bashrc
 
     unit_import() {
+        echo  "** Importing \${1} to Unit Configuration"
         curl -X PUT --data-binary @\${1} --unix-socket "${_unit_control}" http://localhost/config
     }
+
 EOF
 }
