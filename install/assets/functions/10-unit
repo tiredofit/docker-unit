@@ -124,7 +124,91 @@ EOF
     fi
 }
 
+unit_site_enable() {
+    if [ -n "${1}" ]; then
+        if [ "${1,,}" = "all" ] ; then
+            if [ "$(ls -A /etc/unit/sites.available/)" ]; then
+                shopt -s nullglob
+                for site in /etc/unit/sites.available/*.conf; do
+                    print_debug "Enabling Unit Site '$(basename "${site}")'"
+                    ln -sf /etc/unit/sites.available/"$(basename "${site}")" /etc/unit/sites.enabled/
+                done
+                shopt -u nullglob
+            fi
+        else
+            if [ -f "/etc/unit/sites.available/${1}.conf" ]; then
+                print_debug "Enabling Unit Site '${1}.conf'"
+                ln -sf /etc/nginx/unit.available/"${1}".conf /etc/unit/sites.enabled
+            else
+                print_error "Cannot enable site ${1} as it doesn't exist in /etc/unit/sites.available!"
+                exit 1
+            fi
+        fi
+    else
+        print_error "Need configuration file as argument to utilize 'unit_site_enable' function"
+    fi
+}
+
+unit_site_disable() {
+    if [ -n "${1}" ]; then
+        if [ "${1,,}" = "all" ] ; then
+            shopt -s nullglob
+            for site in /etc/unit/sites.enabled/*.conf; do
+                print_debug "Disabling Unit Site '$(basename "${site}")"
+                rm -rf /etc/unit/sites.enabled/"$(basename "${site}")"
+            done
+            shopt -u nullglob
+        else
+            if [ -f "/etc/unit/sites.enabled/${1}.conf" ]; then
+                print_debug "Disabling Unit Site '${1}.conf'"
+                rm -rf /etc/unit/sites.enabled/"${1}"*
+            else
+                print_error "Cannot disable site ${1} as it doesn't exist in /etc/unit/sites.enabled!"
+                exit 1
+            fi
+        fi
+    else
+        print_error "Need configuration file as argument to utilize 'unit_site_disable' function"
+    fi
+}
+
 unit_post_init() {
+    if var_true "${UNIT_ENABLE_APPLICATION_CONFIGURATION}" ; then
+        if [ -n "${UNIT_SITE_ENABLED}" ] ; then
+            if [ "${UNIT_SITE_ENABLED,,}" != "null" ] ; then
+                sites=$(echo "${UNIT_SITE_ENABLED}" | tr "," "\n")
+                for site in $sites; do
+                    unit_site_enable "${site}"
+                done
+            fi
+        else
+            unit_site_enable all
+        fi
+    fi
+
+    if [ -n "${UNIT_POST_INIT_SCRIPT}" ] ; then
+        print_debug "Found Unit Post Init Scripts"
+        post_scripts=$(echo "${UNIT_POST_INIT_SCRIPT}" | tr "," "\n")
+        for post_script in $post_scripts; do
+            if [ -f "${post_script}" ] ; then
+                print_debug "Executing post init script '${post_script}'"
+                chmod +x "${post_script}"
+                "${post_script}"
+            else
+                print_error "Tried to run post script '${post_script}' but it does not exist!"
+            fi
+        done
+    fi
+
+    if [ -n "${UNIT_POST_INIT_COMMAND}" ] ; then
+        print_debug "Found Post Init Command"
+        post_commands=$(echo "${UNIT_POST_INIT_COMMAND}" | tr "," "\n")
+        for post_command in $post_commands ; do
+            print_debug "Executing post init command '${post_command}'"
+            "${post_command}"
+    	done
+    fi
+
     mkdir -p "${UNIT_WEBROOT}"
     if var_true "${UNIT_FORCE_RESET_PERMISSIONS}" ; then
         chown -R "${UNIT_USER}":"${UNIT_GROUP}" "${UNIT_WEBROOT}"
@@ -133,7 +217,7 @@ unit_post_init() {
     cat <<EOF >> /root/.bashrc
 
     unit_import() {
-        curl -x PUT --data-binary @${1} --unix-socket "${_unit_control}" http://localhost/config
+        curl -X PUT --data-binary @\${1} --unix-socket "${_unit_control}" http://localhost/config
     }
 EOF
 }

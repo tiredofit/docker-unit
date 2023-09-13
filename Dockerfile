@@ -62,6 +62,11 @@ RUN source assets/functions/00-container && \
                     && \
     package cleanup && \
     \
+    mkdir -p \
+                /etc/unit/sites.available \
+                /etc/unit/sites.enabled \
+                /etc/unit/snippets \
+                && \
     rm -rf /usr/src/*
 
 EXPOSE 80
