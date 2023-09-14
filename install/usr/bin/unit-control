@@ -4,18 +4,21 @@ source /assets/functions/00-container
 source /assets/defaults/10-unit
 
 if [ -z "${1}" ]; then
-   echo "Tired of I.T! Unit Configuration Tool"
-   echo "Usage: $(basename $0) (clear|edit|import|show) args <silent>"
-   echo ""
-   echo "Example: "
-   echo ""
-   echo "$(basename $0) clear - Clears configuration"
-   echo "$(basename $0) edit - Opens an editor with all configuration and upon save reimports"
-   echo "$(basename $0) import - Imports a file to configuration"
-   echo "$(basename $0) show - Shows all running configuration"
-   echo "$(basename $0) test - Test connectivity to control socket"
-   echo ""
-   echo "Add silent to the end of the argument to make zero output occur"
+   cat <<EOF
+   Tired of I.T! Unit Configuration Tool
+   Usage: $(basename $0) (clear|edit|import|show) args <silent>
+
+   Example:
+
+   $(basename $0) clear - Clears configuration
+   $(basename $0) edit - Opens an editor with all configuration and upon save reimports
+   $(basename $0) import - Imports a file to configuration
+   $(basename $0) show - Shows all running configuration
+   $(basename $0) stats - Runtime Statistics
+   $(basename $0) test - Test connectivity to control socket
+
+   Add 'silent' to the end of each option to make zero output occur..
+EOF
    exit
 fi
 
@@ -93,7 +96,7 @@ case "${1,,}" in
     show)
         curl -s -X GET ${_unit_control} | yq . -o json
     ;;
-    status)
+    stat*)
         curl -s -X GET $(echo ${_unit_control} | sed "s|/config|/status|g")
     ;;
     test)
