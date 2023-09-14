@@ -38,7 +38,6 @@ unit_bootstrap_filesystem() {
     fi
     if [ "$(stat -c %U "${UNIT_STATE_PATH}")" != "${UNIT_USER}" ] ; then chown "${UNIT_USER}":"${UNIT_GROUP}" "${UNIT_STATE_PATH}" ; fi
 }
-
 unit_create_configure_script() {
     mkdir -p  /etc/services.available/11-unit_configure
     cat <<EOF > /etc/services.available/11-unit_configure/run

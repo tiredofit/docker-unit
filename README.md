@@ -82,8 +82,8 @@ The following directories are used for configuration and can be mapped for persi
 
 | Directory | Description |
 | --------- | ----------- |
-
-
+| `/var/log/unit` | Logfiles |
+| `/www/html` | Web root |
 * * *
 ### Environment Variables
 
@@ -102,13 +102,43 @@ Be sure to view the following repositories to understand all the customizable op
 
 | Variable | Value                            | Default |
 | -------- | -------------------------------- | ------- |
-
+| `UNIT_APPLICATION_NAME` | This may be phased out | `Unit` |
+| `UNIT_DISCARD_UNSAFE_FIELDS` | Disable serving unsafe fields | `TRUE` |
+| `UNIT_ENABLE_APPLICATION_CONFIGURATION` | This may be phased out | `TRUE` |
+| `UNIT_ENABLE_CREATE_SAMPLE_HTML` | Create sample index.html file if not existing | `TRUE` |
+| `ENABLE_SERVER_VERSION` | Reveal Unit version in headers | `TRUE` |
+| `UNIT_FORCE_RESET_PERMISSIONS` | Reset permissions of UNIT_WEBROOT each startup | `TRUE` |
+| `UNIT_LISTEN_PORT` | Website listen port | `80` |
+| `UNIT_LOG_FILE` | Main application log file | `unit.log` |
+| `UNIT_LOG_PATH` | Where log files are stored | `/var/log/unit/` |
+| `UNIT_LOG_ROUTES` | Log route information | `FALSE` |
+| `UNIT_LOG_TYPE` | Unit log type `file` `console` | `FILE` |
+| `UNIT_LOG_ACCESS_FILE` | Access log filename | `access.log` |
+| `UNIT_LOG_ACCESS_FORMAT` | Access log format `standard` or `json` | `STANDARD` |
+| `UNIT_LOG_ACCESS_PATH` | Access log path | `${UNIT_LOG_PATH}` |
+| `UNIT_LOG_ACCESS_TYPE` | Access log type `file` `console` `none` | `FILE` |
+| `UNIT_MAX_BODY_SIZE` | Max body size in bytes | `8388608` |
+| `UNIT_TIMEOUT_BODY_READ` | Body read timeout in seconds | `30` |
+| `UNIT_TIMEOUT_BODY_SEND` | Body send timeout in seconds | `30` |
+| `UNIT_TIMEOUT_HEADER_READ` | Header read timeout in seconds | `30` |
+| `UNIT_TIMEOUT_IDLE` | Idle time in seconds | `30` |
+| `UNIT_WEBROOT` | Where website is served from | `/www/html/` |
+| `UNIT_LISTEN_IP` | Website Listen IP | `0.0.0.0` |
+| `UNIT_CONTROL_TYPE` | Socket type `ip` or `socket` | `SOCKET` |
+| `UNIT_CONTROL_SOCKET_NAME` | Socket Name | `control.unit.sock` |
+| `UNIT_CONTROL_SOCKET_PATH` | Socket Path | `/run/unit/` |
+| `UNIT_CONTROL_IP` | Control IP - Warning, do not expose to the internet! | `127.0.0.1` |
+| `UNIT_CONTROL_PORT` | Control Port | `8080` |
+| `UNIT_TMP_PATH` | Temporary Files Path | `/tmp` |
+| `UNIT_STATE_PATH` | Configuration State | `/var/lib/unit/` |
+| `UNIT_MODULE_PATH` | Customizable Module Path | `/usr/lib/unit/modules/` |
+| `UNIT_SETUP_TYPE` | This may be phased out. | `AUTO` |
 
 ### Networking
 
 | Port | Protocol | Description |
 | -----| -------- | ----------- |
-
+| `80`  | `http` | Unit Webserver |
 ## Maintenance
 ### Shell Access
 
