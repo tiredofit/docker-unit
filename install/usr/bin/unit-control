@@ -93,6 +93,9 @@ case "${1,,}" in
     show)
         curl -s -X GET ${_unit_control} | yq . -o json
     ;;
+    status)
+        curl -s -X GET $(echo ${_unit_control} | sed "s|/config|/status|g")
+    ;;
     test)
         if [ "${2}" = "silent" ]; then _prefix=silent; fi
         ${_prefix} curl -s -X GET ${_unit_control} > /dev/null 2>&1
