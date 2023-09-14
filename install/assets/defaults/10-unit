@@ -34,7 +34,7 @@ UNIT_SETUP_TYPE=${UNIT_SETUP_TYPE:-"AUTO"}
 
 case "${UNIT_CONTROL_TYPE,,}" in
     ip)
-        _unit_control="${UNIT_CONTROL_IP}:${UNIT_CONTROL_PORT}"
+        _unit_control"${UNIT_CONTROL_IP}:${UNIT_CONTROL_PORT}"
     ;;
     socket)
         _unit_control="unix:/${UNIT_CONTROL_SOCKET_PATH}/${UNIT_CONTROL_SOCKET_NAME}"
@@ -49,3 +49,6 @@ case "${UNIT_LOG_TYPE,,}" in
         _unit_log="--log ${UNIT_LOG_PATH}/${UNIT_LOG_FILE}"
     ;;
 esac
+
+alias nginx_site_enable=unit_site_enable
+alias nginx_site_disable=unit_site_disable
