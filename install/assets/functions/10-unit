@@ -39,17 +39,45 @@ unit_bootstrap_filesystem() {
     if [ "$(stat -c %U "${UNIT_STATE_PATH}")" != "${UNIT_USER}" ] ; then chown "${UNIT_USER}":"${UNIT_GROUP}" "${UNIT_STATE_PATH}" ; fi
 }
 
+unit_create_configure_script() {
+    mkdir -p  /etc/services.available/11-unit_configure
+    cat <<EOF > /etc/services.available/11-unit_configure/run
+#!/command/with-contenv bash
+
+source /assets/functions/00-container
+PROCESS_NAME="unit_configure"
+check_container_initialized
+check_service_initialized init 10-unit
+source /assets/defaults/10-unit
+
+until pids=$(pidof unitd) ; do sleep 0.1 ; done
+until /usr/bin/unit-control test > /dev/null 2>&1; do sleep 0.1; done
+
+print_debug "Loading unit config"
+/usr/bin/unit-control import unit silent
+
+print_debug "Loading logformat config"
+/usr/bin/unit-control import logformat silent
+
+/usr/bin/unit-control import sites silent
+
+s6-svc -d /var/run/s6/legacy-services/11-unit_configure
+EOF
+
+chmod +x  /etc/services.available/11-unit_configure/run
+}
+
+
 unit_configure_instance() {
     _unit_configure_log_format() {
         print_debug "Updating logformat settings"
-        case "${UNIT_LOG_TYPE}" in
+        case "${UNIT_LOG_TYPE,,}" in
             file)
-                yq -iP '.access_log.path="'$(echo "${UNIT_LOG_ACCESS_PATH}"/"${UNIT_LOG_ACCESS_FILE}")'"' /etc/unit/snippets/logformat/${UNIT_LOG_ACCESS_FORMAT,,}.json -o json
                 create_logrotate unit "${UNIT_LOG_ACCESS_PATH}"/"${UNIT_LOG_ACCESS_FILE}" unit "${UNIT_USER}" "${UNIT_GROUP}"
             ;;
         esac
 
-        case "${UNIT_LOG_ACCESS_TYPE}" in
+        case "${UNIT_LOG_ACCESS_TYPE,,}" in
             console)
                 yq -iP '.access_log.path="/dev/stdout"' /etc/unit/snippets/logformat/${UNIT_LOG_ACCESS_FORMAT,,}.json -o json
             ;;
@@ -61,25 +89,25 @@ unit_configure_instance() {
                 yq -iP '.access_log.path="/dev/null"' /etc/unit/snippets/logformat/${UNIT_LOG_ACCESS_FORMAT,,}.json -o json
             ;;
         esac
+
     }
 
     _unit_configure_settings() {
         print_debug "Updating unit.json settings"
         yq -iP  '
-                    .http.body_read_timeout = env(UNIT_TIMEOUT_BODY_READ) |
-                    .http.header_read_timeout = env(UNIT_TIMEOUT_HEADER_READ) |
-                    .http.idle_timeout = env(UNIT_TIMEOUT_IDLE) |
-                    .http.send_timeout = env(UNIT_TIMEOUT_BODY_SEND) |
-                    .http.max_body_size = env(UNIT_MAX_BODY_SIZE) |
-                    .http.discard_unsafe_fields = env(UNIT_DISCARD_UNSAFE_FIELDS) |
-                    .http.log_route = env(UNIT_LOG_ROUTES) |
-                    .http.server_version = env(UNIT_ENABLE_SERVER_VERSION)
+                    .settings.http.body_read_timeout = env(UNIT_TIMEOUT_BODY_READ) |
+                    .settings.http.header_read_timeout = env(UNIT_TIMEOUT_HEADER_READ) |
+                    .settings.http.idle_timeout = env(UNIT_TIMEOUT_IDLE) |
+                    .settings.http.send_timeout = env(UNIT_TIMEOUT_BODY_SEND) |
+                    .settings.http.max_body_size = env(UNIT_MAX_BODY_SIZE) |
+                    .settings.http.discard_unsafe_fields = env(UNIT_DISCARD_UNSAFE_FIELDS) |
+                    .settings.http.log_route = env(UNIT_LOG_ROUTES) |
+                    .settings.http.server_version = env(UNIT_ENABLE_SERVER_VERSION)
                 ' /etc/unit/snippets/unit.json -o json
     }
 
     _unit_configure_log_format
     _unit_configure_settings
-
 }
 
 unit_configure_site_default() {
@@ -124,54 +152,6 @@ EOF
     fi
 }
 
-unit_site_enable() {
-    if [ -n "${1}" ]; then
-        if [ "${1,,}" = "all" ] ; then
-            if [ "$(ls -A /etc/unit/sites.available/)" ]; then
-                shopt -s nullglob
-                for site in /etc/unit/sites.available/*.json; do
-                    print_debug "Enabling Unit Site '$(basename "${site}")'"
-                    ln -sf /etc/unit/sites.available/"$(basename "${site}")" /etc/unit/sites.enabled/
-                done
-                shopt -u nullglob
-            fi
-        else
-            if [ -f "/etc/unit/sites.available/${1}.conf" ]; then
-                print_debug "Enabling Unit Site '${1}.json'"
-                ln -sf /etc/nginx/unit.available/"${1}".json /etc/unit/sites.enabled
-            else
-                print_error "Cannot enable site ${1} as it doesn't exist in /etc/unit/sites.available!"
-                exit 1
-            fi
-        fi
-    else
-        print_error "Need json configuration file as argument to utilize 'unit_site_enable' function"
-    fi
-}
-
-unit_site_disable() {
-    if [ -n "${1}" ]; then
-        if [ "${1,,}" = "all" ] ; then
-            shopt -s nullglob
-            for site in /etc/unit/sites.enabled/*.json; do
-                print_debug "Disabling Unit Site '$(basename "${site}")"
-                rm -rf /etc/unit/sites.enabled/"$(basename "${site}")"
-            done
-            shopt -u nullglob
-        else
-            if [ -f "/etc/unit/sites.enabled/${1}.json" ]; then
-                print_debug "Disabling Unit Site '${1}.json'"
-                rm -rf /etc/unit/sites.enabled/"${1}"*
-            else
-                print_error "Cannot disable site ${1} as it doesn't exist in /etc/unit/sites.enabled!"
-                exit 1
-            fi
-        fi
-    else
-        print_error "Need configuration file as argument to utilize 'unit_site_disable' function"
-    fi
-}
-
 unit_post_init() {
     if var_true "${UNIT_ENABLE_APPLICATION_CONFIGURATION}" ; then
         if [ -n "${UNIT_SITE_ENABLED}" ] ; then
@@ -213,17 +193,55 @@ unit_post_init() {
     if var_true "${UNIT_FORCE_RESET_PERMISSIONS}" ; then
         chown -R "${UNIT_USER}":"${UNIT_GROUP}" "${UNIT_WEBROOT}"
     fi
-
-    if [ "${UNIT_CONTROL_TYPE,,}" = "socket" ]; then
-        _unit_control="$(echo "${_unit_control}" | sed "s|unix:/||g")"
-    fi
-
-    cat <<EOF >> /root/.bashrc
-
-    unit_import() {
-        echo  "** Importing \${1} to Unit Configuration"
-        curl -X PUT --data-binary @\${1} --unix-socket "${_unit_control}" http://localhost/config
-    }
-
-EOF
 }
+
+unit_site_disable() {
+    if [ -n "${1}" ]; then
+        if [ "${1,,}" = "all" ] ; then
+            shopt -s nullglob
+            for site in /etc/unit/sites.enabled/*.json; do
+                print_debug "Disabling Unit Site '$(basename "${site}")"
+                rm -rf /etc/unit/sites.enabled/"$(basename "${site}")"
+            done
+            shopt -u nullglob
+        else
+            if [ -f "/etc/unit/sites.enabled/${1}.json" ]; then
+                print_debug "Disabling Unit Site '${1}.json'"
+                rm -rf /etc/unit/sites.enabled/"${1}"*
+            else
+                print_error "Cannot disable site ${1} as it doesn't exist in /etc/unit/sites.enabled!"
+                exit 1
+            fi
+        fi
+    else
+        print_error "Need configuration file as argument to utilize 'unit_site_disable' function"
+    fi
+}
+
+unit_site_enable() {
+    if [ -n "${1}" ]; then
+        if [ "${1,,}" = "all" ] ; then
+            if [ "$(ls -A /etc/unit/sites.available/)" ]; then
+                shopt -s nullglob
+                for site in /etc/unit/sites.available/*.json; do
+                    print_debug "Enabling Unit Site '$(basename "${site}")'"
+                    ln -sf /etc/unit/sites.available/"$(basename "${site}")" /etc/unit/sites.enabled/
+                done
+                shopt -u nullglob
+            fi
+        else
+            if [ -f "/etc/unit/sites.available/${1}.conf" ]; then
+                print_debug "Enabling Unit Site '${1}.json'"
+                ln -sf /etc/nginx/unit.available/"${1}".json /etc/unit/sites.enabled
+            else
+                print_error "Cannot enable site ${1} as it doesn't exist in /etc/unit/sites.available!"
+                exit 1
+            fi
+        fi
+    else
+        print_error "Need json configuration file as argument to utilize 'unit_site_enable' function"
+    fi
+}
+
+
+
