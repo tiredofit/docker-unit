@@ -27,18 +27,26 @@ RUN source assets/functions/00-container && \
     package update && \
     package upgrade && \
     package install .unit-build-deps \
+                    $(if [ -f "/unit-assets/build-deps" ] ; then echo "/unit-assets/build-deps"; fi;) \
                     build-base \
                     git \
                     linux-headers \
-	                #openssl-dev \
+	                openssl-dev \
                     pcre-dev \
+                    #perl-dev \
+                	php82-dev \
+                	php82-embed \
+                	#python3-dev \
+                	#ruby-dev \
                     && \
     \
     package install .unit-run-deps \
+                    $(if [ -f "/unit-assets/run-deps" ] ; then echo "/unit-assets/run-deps" ; fi;) \
                     jq \
                     && \
     \
     clone_git_repo "${UNIT_REPO_URL}" "${UNIT_VERSION}" && \
+    curl -sSL https://git.alpinelinux.org/aports/plain/community/unit/phpver.patch | patch -p1 && \
     ./configure \
 		--prefix="/usr" \
 		--localstatedir="/var" \
@@ -49,11 +57,16 @@ RUN source assets/functions/00-container && \
 		--mandir=/usr/src/unit.tmp \
 		--modulesdir="/usr/lib/unit/modules" \
         --tmpdir=/tmp \
-		#--openssl \
+		--openssl \
 		--user="${UNIT_USER}" \
 		--group="${UNIT_GROUP}" \
-		--tests \
+        $(if [ -f "/unit-assets/configure-args" ] ; then echo "/unit-assets/configure-args" ; fi;) \
+        --tests \
         && \
+    #./configure perl && \
+    ./configure php --module=php82 --config=php-config82 && \
+    #./configure python --config=python3-config && \
+    #./configure ruby && \
 	make -j $(nproc) && \
 	make tests && \
     make install && \
