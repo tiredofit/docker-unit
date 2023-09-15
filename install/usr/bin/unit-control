@@ -6,7 +6,7 @@ source /assets/defaults/10-unit
 if [ -z "${1}" ]; then
    cat <<EOF
    Tired of I.T! Unit Configuration Tool
-   Usage: $(basename $0) (clear|edit|import|show) args <silent>
+   Usage: $(basename $0) (clear|edit|import|show|stats|test) args <silent>
 
    Example:
 

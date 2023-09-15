@@ -33,6 +33,7 @@ This will build a Docker Image for [Unit](https://unit.nginx.org), A ..
   - [Networking](#networking)
 - [Maintenance](#maintenance)
   - [Shell Access](#shell-access)
+  - [Controlling Configuration](#controlling-configuration)
 - [Support](#support)
   - [Usage](#usage)
   - [Bugfixes](#bugfixes)
@@ -140,6 +141,8 @@ Be sure to view the following repositories to understand all the customizable op
 | Port | Protocol | Description    |
 | ---- | -------- | -------------- |
 | `80` | `http`   | Unit Webserver |
+
+
 ## Maintenance
 ### Shell Access
 
@@ -148,6 +151,19 @@ For debugging and maintenance purposes you may want access the containers shell.
 ```bash
 docker exec -it (whatever your container name is) bash
 ```
+
+
+### Controlling Configuration
+
+Once inside the container - there is a utility `unit-control` that will allow you to perform various configuration functions such as:
+
+  - `show` Configuration
+  - `import` a file to configureation
+  - `edit` in place running configuration with editor such as `nano` (set via `$EDITOR`)
+  - `test` if the control socket is able to be accessed
+  - `clear` all the running configuration
+  - `stats` show statistics of the running instance and applications
+
 ## Support
 
 These images were built to serve a specific need in a production environment and gradually have had more functionality added based on requests from the community.
