@@ -110,7 +110,7 @@ unit_configure_instance() {
 }
 
 unit_configure_site_default() {
-    if [ -z "${UNIT_SITE_ENABLED}" ] && [ ! -f "/etc/unit/sites.available/default.json" ] ; then
+    if [ -z "${UNIT_SITE_ENABLED}" ] && [ ! -f "/etc/unit/sites.available/default.json" ] && [ ! -f "/etc/cont-init.d/20-unit-php" ] ; then
         cat <<EOF > /etc/unit/sites.available/default.json
 {
   "listeners": {
