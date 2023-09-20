@@ -229,7 +229,7 @@ unit_site_enable() {
                 shopt -u nullglob
             fi
         else
-            if [ -f "/etc/unit/sites.available/${1}.conf" ]; then
+            if [ -f "/etc/unit/sites.available/${1}.json" ]; then
                 print_debug "Enabling Unit Site '${1}.json'"
                 ln -sf /etc/nginx/unit.available/"${1}".json /etc/unit/sites.enabled
             else
