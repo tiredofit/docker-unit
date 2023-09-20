@@ -78,7 +78,7 @@ case "${1,,}" in
         now="$(TZ=$TIMEZONE date '+%Y%m%d-%H%M%S')"
         _tmp_unit_config=$(mktemp)
         if [ "${2}" = "silent" ]; then _prefix=silent; fi
-        ${_prefix} curl -X GET ${_unit_control} > "${_tmp_unit_config}"
+        ${_prefix} curl -sX GET ${_unit_control} > "${_tmp_unit_config}"
         cp "${_tmp_unit_config}" /tmp/"${now}"-unit.json
         echo "** Editing existing config. Backup copy saved at /tmp/${now}-unit.json"
         _tmp_unit_config_md5_orig="$(md5sum "${_tmp_unit_config}")"
@@ -86,8 +86,8 @@ case "${1,,}" in
         _tmp_unit_config_md5_edit="$(md5sum "${_tmp_unit_config}")"
         if [ "${_tmp_unit_config_md5_orig}" != "${_tmp_unit_config_md5_edit}" ]; then
             echo "** Importing to Unit Configuration"
-            ${_prefix} curl -X DELETE ${_unit_control}
-            ${_prefix} curl -X PUT --data-binary @${_tmp_unit_config} ${_unit_control}
+            ${_prefix} curl -sX DELETE ${_unit_control}
+            ${_prefix} curl -sX PUT --data-binary @${_tmp_unit_config} ${_unit_control}
         else
             echo "** Skipping Importing as file contents are the same"
         fi
