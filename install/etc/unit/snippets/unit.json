@@ -1,5 +1,4 @@
 {
-  "settings": {
     "http": {
       "header_read_timeout": 30,
       "body_read_timeout": 30,
@@ -11,5 +10,4 @@
       "log_route": false,
       "server_version": true
     }
-  }
 }

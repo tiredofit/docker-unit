@@ -13,7 +13,7 @@ if [ ! -f "/tmp/.container/container-restart" ] ; then
         if var_true "${UNIT_ENABLE_APPLICATION_CONFIGURATION}"; then
             unit_configure_site
             if var_true "${UNIT_ENABLE_CREATE_SAMPLE_HTML}" ; then unit_create_sample_html ; fi
-            unit_create_configure_script
+            unit_create_configure_import_script
         else
             print_notice "Not configurating Website configuration files"
         fi

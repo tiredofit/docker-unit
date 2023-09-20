@@ -9,7 +9,7 @@
 
 ## About
 
-This will build a Docker Image for [Unit](https://unit.nginx.org), A ..
+This will build a Docker Image for [Unit](https://unit.nginx.org), A high performance application server. This is a base image that can serve static files. You will likely need to use a different downstream image if you wish to serve PHP files such as [tiredofit/unit-php](https://github.com/tiredofit/docker-unit-php)
 
 ## Maintainer
 
@@ -26,6 +26,7 @@ This will build a Docker Image for [Unit](https://unit.nginx.org), A ..
     - [Multi Architecture](#multi-architecture)
 - [Configuration](#configuration)
   - [Quick Start](#quick-start)
+  - [Creating configuration](#creating-configuration)
   - [Persistent Storage](#persistent-storage)
   - [Environment Variables](#environment-variables)
     - [Base Images used](#base-images-used)
@@ -78,6 +79,20 @@ Images are built primarily for `amd64` architecture, and may also include builds
 * Set various [environment variables](#environment-variables) to understand the capabilities of this image.
 * Map [persistent storage](#data-volumes) for access to configuration and data files for backup.
 
+### Creating configuration
+
+This image expects that you place 3+ files into the `/etc/unit/sites.available` directory along with setting the variable `UNIT_SITE_ENABLED`.
+
+- The image will look for the following files:
+  - `$UNIT_SITE_ENABLED-listener.json` - Configuration of the listening port, IP, and what to do upon recieving a connection
+  - `$UNIT_SITE_ENABLED-uptream.json` - Configuration of the upstream to pass traffic to. This is an optional file and not used regularly
+  - `$UNIT_SITE_ENABLED-route.json` - Configuration of route configuration for above listener. This dictates the files to respond to and how to route to an application
+  - `$UNIT_SITE_ENABLED-application.json` - Configuration of the application, which can perform certain actions or call application engines based on the name
+
+See the [Unit Configuration](https://unit.nginx.org/configuration/) to understand how this works.
+
+If you do not create any configuration, a default configuration will be created, and a sample HTML page will be generated if requested to show that the server is working.
+
 ### Persistent Storage
 
 The following directories are used for configuration and can be mapped for persistent storage.
@@ -86,6 +101,7 @@ The following directories are used for configuration and can be mapped for persi
 | --------------- | ----------- |
 | `/var/log/unit` | Logfiles    |
 | `/www/html`     | Web root    |
+
 * * *
 ### Environment Variables
 
@@ -158,7 +174,7 @@ docker exec -it (whatever your container name is) bash
 Once inside the container - there is a utility `unit-control` that will allow you to perform various configuration functions such as:
 
   - `show` Configuration
-  - `import` a file to configureation
+  - `import` a file to configureation - This will clear all configuration unless you use additional arguments (undocumented)
   - `edit` in place running configuration with editor such as `nano` (set via `$EDITOR`)
   - `test` if the control socket is able to be accessed
   - `clear` all the running configuration
@@ -186,4 +202,4 @@ MIT. See [LICENSE](LICENSE) for more details.
 
 ## References
 
-* <https://>
+* <https://unit.nginx.org>

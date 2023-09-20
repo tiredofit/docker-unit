@@ -22,9 +22,11 @@ unit_bootstrap_filesystem() {
                 mkdir -p "${UNIT_LOG_ACCESS_PATH}"
             fi
 
-            if [ "$(stat -c %U "${UNIT_LOG_ACCESS_PATH}")" != "${UNIT_USER}" ] ; then chown "${UNIT_USER}":"${UNIT_GROUP}" "${UNIT_LOG_ACCESS_PATH}" ; fi
-            touch "${UNIT_LOG_ACCESS_PATH}"/"${UNIT_LOG_ACCESS_FILE}"
-            chown -R "${UNIT_USER}":"${UNIT_GROUP}" "${UNIT_LOG_ACCESSPATH}"/"${UNIT_LOG_ACCESS_FILE}"
+            if [ "$(stat -c %U "${UNIT_LOG_ACCESS_PATH}")" != "${UNIT_USER}" ] && [ "${UNIT_LOG_ACCESS_TYPE,,}" != "none" ]; then
+                chown "${UNIT_USER}":"${UNIT_GROUP}" "${UNIT_LOG_ACCESS_PATH}"
+                touch "${UNIT_LOG_ACCESS_PATH}"/"${UNIT_LOG_ACCESS_FILE}"
+                chown -R "${UNIT_USER}":"${UNIT_GROUP}" "${UNIT_LOG_ACCESSPATH}"/"${UNIT_LOG_ACCESS_FILE}"
+            fi
         fi
     fi
 
@@ -39,7 +41,7 @@ unit_bootstrap_filesystem() {
     if [ "$(stat -c %U "${UNIT_STATE_PATH}")" != "${UNIT_USER}" ] ; then chown "${UNIT_USER}":"${UNIT_GROUP}" "${UNIT_STATE_PATH}" ; fi
 }
 
-unit_create_configure_script() {
+unit_create_configure_import_script() {
     mkdir -p  /etc/services.available/11-unit_configure
     cat <<EOF > /etc/services.available/11-unit_configure/run
 #!/command/with-contenv bash
@@ -56,10 +58,11 @@ until /usr/bin/unit-control test > /dev/null 2>&1; do sleep 0.1; done
 print_debug "Loading unit config"
 /usr/bin/unit-control import unit silent
 
-print_debug "Loading logformat config"
-/usr/bin/unit-control import logformat silent
+print_debug "Loading access_log config"
+/usr/bin/unit-control import access_log silent
 
-/usr/bin/unit-control import sites silent
+print_debug "Loading enabled sites"
+/usr/bin/unit-control import sites
 
 s6-svc -d /var/run/s6/legacy-services/11-unit_configure
 EOF
@@ -69,40 +72,36 @@ chmod +x  /etc/services.available/11-unit_configure/run
 
 
 unit_configure_instance() {
-    _unit_configure_log_format() {
-        print_debug "Updating logformat settings"
-        case "${UNIT_LOG_TYPE,,}" in
-            file)
+    _unit_configure_log_format() {set -x
                 create_logrotate unit "${UNIT_LOG_ACCESS_PATH}"/"${UNIT_LOG_ACCESS_FILE}" unit "${UNIT_USER}" "${UNIT_GROUP}"
             ;;
         esac
 
         case "${UNIT_LOG_ACCESS_TYPE,,}" in
             console)
-                yq -iP '.access_log.path="/dev/stdout"' /etc/unit/snippets/logformat/${UNIT_LOG_ACCESS_FORMAT,,}.json -o json
+                yq -iP '.path="/dev/stdout"' /etc/unit/snippets/access_log/${UNIT_LOG_ACCESS_FORMAT,,}.json -o json
             ;;
             file)
-                yq -iP '.access_log.path="'$(echo "${UNIT_LOG_ACCESS_PATH}"/"${UNIT_LOG_ACCESS_FILE}")'"' /etc/unit/snippets/logformat/${UNIT_LOG_ACCESS_FORMAT,,}.json -o json
+                yq -iP '.path="'$(echo "${UNIT_LOG_ACCESS_PATH}"/"${UNIT_LOG_ACCESS_FILE}")'"' /etc/unit/snippets/access_log/${UNIT_LOG_ACCESS_FORMAT,,}.json -o json
                 create_logrotate unit-access "${UNIT_LOG_ACCESS_PATH}"/"${UNIT_LOG_ACCESS_FILE}" unit-access-"${UNIT_LOG_ACCESS_FORMAT,,}" "${UNIT_USER}" "${UNIT_GROUP}"
             ;;
             none)
-                yq -iP '.access_log.path="/dev/null"' /etc/unit/snippets/logformat/${UNIT_LOG_ACCESS_FORMAT,,}.json -o json
+                yq -iP '.path="/dev/null"' /etc/unit/snippets/access_log/${UNIT_LOG_ACCESS_FORMAT,,}.json -o json
             ;;
         esac
-
     }
 
     _unit_configure_settings() {
         print_debug "Updating unit.json settings"
         yq -iP  '
-                    .settings.http.body_read_timeout = env(UNIT_TIMEOUT_BODY_READ) |
-                    .settings.http.header_read_timeout = env(UNIT_TIMEOUT_HEADER_READ) |
-                    .settings.http.idle_timeout = env(UNIT_TIMEOUT_IDLE) |
-                    .settings.http.send_timeout = env(UNIT_TIMEOUT_BODY_SEND) |
-                    .settings.http.max_body_size = env(UNIT_MAX_BODY_SIZE) |
-                    .settings.http.discard_unsafe_fields = env(UNIT_DISCARD_UNSAFE_FIELDS) |
-                    .settings.http.log_route = env(UNIT_LOG_ROUTES) |
-                    .settings.http.server_version = env(UNIT_ENABLE_SERVER_VERSION)
+                    .http.body_read_timeout = env(UNIT_TIMEOUT_BODY_READ) |
+                    .http.header_read_timeout = env(UNIT_TIMEOUT_HEADER_READ) |
+                    .http.idle_timeout = env(UNIT_TIMEOUT_IDLE) |
+                    .http.send_timeout = env(UNIT_TIMEOUT_BODY_SEND) |
+                    .http.max_body_size = env(UNIT_MAX_BODY_SIZE) |
+                    .http.discard_unsafe_fields = env(UNIT_DISCARD_UNSAFE_FIELDS) |
+                    .http.log_route = env(UNIT_LOG_ROUTES) |
+                    .http.server_version = env(UNIT_ENABLE_SERVER_VERSION)
                 ' /etc/unit/snippets/unit.json -o json
     }
 
@@ -112,39 +111,49 @@ unit_configure_instance() {
 
 unit_configure_site() {
     _unit_configure_site_default() {
-        if [ -z "${UNIT_SITE_ENABLED}" ] && [ ! -f "/etc/unit/sites.available/default.json" ] && [ ! -f "/etc/cont-init.d/20-unit-php" ] ; then
-            _unit_configure_site_default
-                UNIT_SITE_ENABLED=default
-                cat <<EOF > /etc/unit/sites.available/default.json
-{
-   "listeners":{
+        if [ -z "${UNIT_SITE_ENABLED}" ] && [ ! -f "/etc/unit/sites.available/default-listener.json" ] && [ ! -f "/etc/cont-init.d/20-unit-php" ] ; then
+            UNIT_SITE_ENABLED=default
+            cat <<EOF > /etc/unit/sites.available/"${UNIT_SITE_ENABLED}"-listener.json
       "${UNIT_LISTEN_IP}:${UNIT_LISTEN_PORT}":{
          "pass":"routes"
       }
-   },
-   "routes":[
+EOF
+            yq -nP  '
+                        ."'$(echo "${UNIT_LISTEN_IP}:${UNIT_LISTEN_PORT}")'".pass="routes"
+                    ' -o json > /etc/unit/sites.available/"${UNIT_SITE_ENABLED}"-listener.json
+
+            cat <<EOF > /etc/unit/sites.available/"${UNIT_SITE_ENABLED}"-route.json
+   [
       {
          "action":{
             "share": "${UNIT_WEBROOT}/\$uri"
          }
       }
    ]
-}
 EOF
-                # Not entirely working yet
-                #yq -nP  '
-                #            .listeners."'$(echo "${UNIT_LISTEN_IP}:${UNIT_LISTEN_PORT}")'".pass="routes" |
-                #            .routes.action.share = "'$(echo "${UNIT_WEBROOT}")'/$uri"
-                #        ' -o json > /etc/unit/sites.available/default.json
+
+            # Not entirely working yet
+            #yq -nP  '
+            #            .routes.action.share = "'$(echo "${UNIT_WEBROOT}")'/$uri"
+            #        ' -o json > /etc/unit/sites.available/default.json
         fi
     }
 
     _unit_configure_site_targetted() {
-        update_template /etc/unit/sites.available/${1}.json \
+        update_template /etc/unit/sites.available/${1}-listener.json \
                                                             UNIT_LISTEN_IP \
-                                                            UNIT_LISTEN_PORT \
+                                                            UNIT_LISTEN_PORT
+
+        update_template /etc/unit/sites.available/${1}-upstream.json \
+                                                            UNIT_ONE_DAY
+
+        update_template /etc/unit/sites.available/${1}-route.json \
+                                                            UNIT_WEBROOT
+
+        update_template /etc/unit/sites.available/${1}-application.json \
                                                             UNIT_WEBROOT
     }
+
 
     if [ -n "${1}" ]; then
         case "${1}" in
@@ -157,7 +166,7 @@ EOF
                 done
             ;;
             *)
-                if [ -f /etc/unit/sites.available/"${1}".json ]; then
+                if compgen -G "/etc/unit/sites.available/${1}*.json" >/dev/null ; then
                     _unit_configure_site_targetted /etc/unit/sites.available/"${1}".json
                 fi
             ;;
@@ -233,16 +242,14 @@ unit_post_init() {
 unit_site_disable() {
     if [ -n "${1}" ]; then
         if [ "${1,,}" = "all" ] ; then
-            shopt -s nullglob
             for site in /etc/unit/sites.enabled/*.json; do
                 print_debug "Disabling Unit Site '$(basename "${site}")"
                 rm -rf /etc/unit/sites.enabled/"$(basename "${site}")"
             done
-            shopt -u nullglob
         else
-            if [ -f "/etc/unit/sites.enabled/${1}.json" ]; then
-                print_debug "Disabling Unit Site '${1}.json'"
-                rm -rf /etc/unit/sites.enabled/"${1}"*
+            if compgen -G "/etc/unit/sites.available/${1}*.json" >/dev/null ; then
+                print_debug "Disabling Unit Site '${1}'"
+                rm -rf /etc/unit/sites.enabled/"${1}"*.json
             else
                 print_error "Cannot disable site ${1} as it doesn't exist in /etc/unit/sites.enabled!"
                 exit 1
@@ -257,17 +264,17 @@ unit_site_enable() {
     if [ -n "${1}" ]; then
         if [ "${1,,}" = "all" ] ; then
             if [ "$(ls -A /etc/unit/sites.available/)" ]; then
-                shopt -s nullglob
                 for site in /etc/unit/sites.available/*.json; do
                     print_debug "Enabling Unit Site '$(basename "${site}")'"
                     ln -sf /etc/unit/sites.available/"$(basename "${site}")" /etc/unit/sites.enabled/
                 done
-                shopt -u nullglob
             fi
         else
-            if [ -f "/etc/unit/sites.available/${1}.json" ]; then
-                print_debug "Enabling Unit Site '${1}.json'"
-                ln -sf /etc/unit/sites.available/"${1}".json /etc/unit/sites.enabled
+            if compgen -G "/etc/unit/sites.available/${1}*.json" >/dev/null ; then
+                print_debug "Enabling Unit Site '${1}'"
+                for site in /etc/unit/sites.available/"${1}"*.json; do
+                    ln -sf "${site}" /etc/unit/sites.enabled
+                done
             else
                 print_error "Cannot enable site ${1} as it doesn't exist in /etc/unit/sites.available!"
                 exit 1
@@ -277,6 +284,3 @@ unit_site_enable() {
         print_error "Need json configuration file as argument to utilize 'unit_site_enable' function"
     fi
 }
-
-
-

@@ -1,5 +1,0 @@
-{
-    "access_log": {
-        "format": "{ \"time\":\"$time_local\", "remote_addr\":\"$remote_addr\", \"host\":\"$host\", \"response\":\"$status\", \"method\":\"$method\", \"request_uri\":\"$request_uri\", \"body_bytes_sent\":\"$body_bytes_sent\", \"header_referer\":\"$header_referer\", \"header_user_agent\":\"$header_user_agent\""
-    }
-}

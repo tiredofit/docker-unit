@@ -1,5 +1,0 @@
-{
-    "access_log": {
-        "format": "$time_local $remote_addr $host $status $method \"$request_uri\" $body_bytes_sent \"$header_referer\" \"$header_user_agent\""
-    }
-}
