@@ -132,6 +132,7 @@ EOF
         #            .listeners."'$(echo "${UNIT_LISTEN_IP}:${UNIT_LISTEN_PORT}")'".pass="routes" |
         #            .routes.action.share = "'$(echo "${UNIT_WEBROOT}")'/$uri"
         #        ' -o json > /etc/unit/sites.available/default.json
+        UNIT_SITE_ENABLED=default
     fi
 }
 
@@ -231,7 +232,7 @@ unit_site_enable() {
         else
             if [ -f "/etc/unit/sites.available/${1}.json" ]; then
                 print_debug "Enabling Unit Site '${1}.json'"
-                ln -sf /etc/nginx/unit.available/"${1}".json /etc/unit/sites.enabled
+                ln -sf /etc/unit/sites.available/"${1}".json /etc/unit/sites.enabled
             else
                 print_error "Cannot enable site ${1} as it doesn't exist in /etc/unit/sites.available!"
                 exit 1
