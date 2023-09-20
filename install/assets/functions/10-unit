@@ -113,11 +113,6 @@ unit_configure_site() {
     _unit_configure_site_default() {
         if [ -z "${UNIT_SITE_ENABLED}" ] && [ ! -f "/etc/unit/sites.available/default-listener.json" ] && [ ! -f "/etc/cont-init.d/20-unit-php" ] ; then
             UNIT_SITE_ENABLED=default
-            cat <<EOF > /etc/unit/sites.available/"${UNIT_SITE_ENABLED}"-listener.json
-      "${UNIT_LISTEN_IP}:${UNIT_LISTEN_PORT}":{
-         "pass":"routes"
-      }
-EOF
             yq -nP  '
                         ."'$(echo "${UNIT_LISTEN_IP}:${UNIT_LISTEN_PORT}")'".pass="routes"
                     ' -o json > /etc/unit/sites.available/"${UNIT_SITE_ENABLED}"-listener.json
