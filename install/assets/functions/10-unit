@@ -38,6 +38,7 @@ unit_bootstrap_filesystem() {
     fi
     if [ "$(stat -c %U "${UNIT_STATE_PATH}")" != "${UNIT_USER}" ] ; then chown "${UNIT_USER}":"${UNIT_GROUP}" "${UNIT_STATE_PATH}" ; fi
 }
+
 unit_create_configure_script() {
     mkdir -p  /etc/services.available/11-unit_configure
     cat <<EOF > /etc/services.available/11-unit_configure/run
@@ -109,30 +110,64 @@ unit_configure_instance() {
     _unit_configure_settings
 }
 
-unit_configure_site_default() {
-    if [ -z "${UNIT_SITE_ENABLED}" ] && [ ! -f "/etc/unit/sites.available/default.json" ] && [ ! -f "/etc/cont-init.d/20-unit-php" ] ; then
-        cat <<EOF > /etc/unit/sites.available/default.json
+unit_configure_site() {
+    _unit_configure_site_default() {
+        if [ -z "${UNIT_SITE_ENABLED}" ] && [ ! -f "/etc/unit/sites.available/default.json" ] && [ ! -f "/etc/cont-init.d/20-unit-php" ] ; then
+            _unit_configure_site_default
+                UNIT_SITE_ENABLED=default
+                cat <<EOF > /etc/unit/sites.available/default.json
 {
-  "listeners": {
-    "${UNIT_LISTEN_IP}:${UNIT_LISTEN_PORT}": {
-      "pass": "routes"
-    }
-  },
-  "routes": [
-    {
-      "action": {
-        "share": "${UNIT_WEBROOT}/\$uri"
+   "listeners":{
+      "${UNIT_LISTEN_IP}:${UNIT_LISTEN_PORT}":{
+         "pass":"routes"
       }
-    }
-  ]
+   },
+   "routes":[
+      {
+         "action":{
+            "share": "${UNIT_WEBROOT}/\$uri"
+         }
+      }
+   ]
 }
 EOF
-        # Not entirely working yet
-        #yq -nP  '
-        #            .listeners."'$(echo "${UNIT_LISTEN_IP}:${UNIT_LISTEN_PORT}")'".pass="routes" |
-        #            .routes.action.share = "'$(echo "${UNIT_WEBROOT}")'/$uri"
-        #        ' -o json > /etc/unit/sites.available/default.json
-        UNIT_SITE_ENABLED=default
+                # Not entirely working yet
+                #yq -nP  '
+                #            .listeners."'$(echo "${UNIT_LISTEN_IP}:${UNIT_LISTEN_PORT}")'".pass="routes" |
+                #            .routes.action.share = "'$(echo "${UNIT_WEBROOT}")'/$uri"
+                #        ' -o json > /etc/unit/sites.available/default.json
+        fi
+    }
+
+    _unit_configure_site_targetted() {
+        update_template /etc/unit/sites.available/${1}.json \
+                                                            UNIT_LISTEN_IP \
+                                                            UNIT_LISTEN_PORT \
+                                                            UNIT_WEBROOT
+    }
+
+    if [ -n "${1}" ]; then
+        case "${1}" in
+            default)
+                _unit_configure_site_default
+            ;;
+            all)
+                for config in /etc/unit/sites.available/*.json ; do
+                    _unit_configure_site_targetted $(basename $config)
+                done
+            ;;
+            *)
+                if [ -f /etc/unit/sites.available/"${1}".json ]; then
+                    _unit_configure_site_targetted /etc/unit/sites.available/"${1}".json
+                fi
+            ;;
+        esac
+    else
+        if [ -n "${UNIT_SITE_ENABLED}" ]; then
+            _unit_configure_site_targetted /etc/unit/sites.available/"${1}".json
+        else
+            _unit_configure_site_default
+        fi
     fi
 }
 

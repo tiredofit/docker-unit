@@ -11,7 +11,7 @@ if [ ! -f "/tmp/.container/container-restart" ] ; then
     if [ "${UNIT_SETUP_TYPE,,}" = "auto" ]; then
         unit_configure_instance
         if var_true "${UNIT_ENABLE_APPLICATION_CONFIGURATION}"; then
-            unit_configure_site_default
+            unit_configure_site
             if var_true "${UNIT_ENABLE_CREATE_SAMPLE_HTML}" ; then unit_create_sample_html ; fi
             unit_create_configure_script
         else
