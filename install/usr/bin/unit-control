@@ -49,14 +49,14 @@ case "${1,,}" in
                     ${_prefix} curl -X PUT --data-binary @/etc/unit/snippets/unit.json ${_unit_control}
                 ;;
                 sites)
-                    for site_config in /etc/unit/sites.available/*.json; do
+                    for site_config in /etc/unit/sites.enabled/*.json; do
                         ${_prefix} curl -X PUT --data-binary @${site_config} ${_unit_control}
                     done
                 ;;
                 all)
                     ${_prefix} curl -X PUT --data-binary @/etc/unit/snippets/unit.json ${_unit_control}
                     ${_prefix} curl -X PUT --data-binary @/etc/unit/snippets/logformat/${UNIT_LOG_ACCESS_FORMAT,,}.json ${_unit_control}
-                    for site_config in /etc/unit/sites.available/*.json; do
+                    for site_config in /etc/unit/sites.enabled/*.json; do
                         ${_prefix} curl -X PUT --data-binary @${site_config} ${_unit_control}
                     done
                 ;;
