@@ -11,6 +11,10 @@
 
 This will build a Docker Image for [Unit](https://unit.nginx.org), A high performance application server. This is a base image that can serve static files. You will likely need to use a different downstream image if you wish to serve PHP files such as [tiredofit/unit-php](https://github.com/tiredofit/docker-unit-php)
 
+- Supports various Node, Perl, PHP, Python, Ruby runtime engines
+- Auto configuration generation and import
+
+
 ## Maintainer
 
 - [Dave Conroy](https://github.com/tiredofit/)
