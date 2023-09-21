@@ -116,19 +116,19 @@ unit_configure_site() {
                         .*.processes.max=env(UNIT_APPLICATION_PROCESS_MAX) |
                         .*.processes.spare=env(UNIT_APPLICATION_PROCESS_SPARE) |
                         .*.processes.idle_timeout=env(UNIT_APPLICATION_PROCESS_TIMEOUT)
-                ' -o json "${1}".json
+                    ' -o json "${1}".json
         fi
 
         if [[ "${UNIT_APPLICATION_LIMIT_REQUEST_RECYCLE}" -ge 1 ]] ; then
             yq -iP '
                         .*.limits.requests=env(UNIT_APPLICATION_LIMIT_REQUEST_RECYCLE)
-                ' -o json "${1}".json
+                    ' -o json "${1}".json
         fi
 
         if [[ "${UNIT_APPLICATION_LIMIT_TIMEOUT}" -ge 1 ]] ; then
             yq -iP '
                         .*.limits.timeout=env(UNIT_APPLICATION_LIMIT_TIMEOUT)
-                ' -o json "${1}".json
+                    ' -o json "${1}".json
         fi
     }
 
