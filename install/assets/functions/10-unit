@@ -43,6 +43,7 @@ unit_bootstrap_filesystem() {
 
 unit_configure_instance() {
     _unit_configure_log_format() {
+
         print_debug "Updating access_log/logformat settings"
         case "${UNIT_LOG_TYPE,,}" in
             file)
@@ -101,11 +102,11 @@ unit_configure_monitoring() {
 # Autoregister=unit
 
 UserParameter=unit.get_statistics,curl -s -X GET ${_monitor_control}
-UserParameter=unit.version,unitd --version 2>/tmp/.container/unit.version ; head -n1 /tmp/.container/unit.version | awk '{print $3}'
+UserParameter=unit.version,unitd --version 2>/tmp/.unit.version ; head -n1 /tmp/.unit.version | awk '{print \$3}'
 EOF
 
-        chmod 700 "${ZABBIX_CONFIG_PATH}"/"${ZABBIX_CONFIG_FILE}.d"/tiredofit_mariadb.conf
-        chown zabbix:root "${ZABBIX_CONFIG_PATH}"/"${ZABBIX_CONFIG_FILE}.d"/tiredofit_mariadb.conf
+        chmod 700 "${ZABBIX_CONFIG_PATH}"/"${ZABBIX_CONFIG_FILE}.d"/tiredofit_unit.conf
+        chown zabbix:root "${ZABBIX_CONFIG_PATH}"/"${ZABBIX_CONFIG_FILE}.d"/tiredofit_unit.conf
     fi
 }
 
