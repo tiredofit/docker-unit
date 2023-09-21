@@ -159,9 +159,7 @@ Be sure to view the following repositories to understand all the customizable op
 | ------------------------------------------------------ | -------------------------------------- |
 | [OS Base](https://github.com/tiredofit/docker-alpine/) | Customized Image based on Alpine Linux |
 
-
 #### Core
-
 | Variable                                | Value                                                | Default                  |
 | --------------------------------------- | ---------------------------------------------------- | ------------------------ |
 | `UNIT_ENABLE_APPLICATION_CONFIGURATION` | This allows for auto configuration                   | `TRUE`                   |
@@ -179,7 +177,6 @@ Be sure to view the following repositories to understand all the customizable op
 | `UNIT_WEBROOT`                          | Where website is served from                         | `/www/html/`             |
 
 #### Logging
-
 | Variable                 | Value                                   | Default            |
 | ------------------------ | --------------------------------------- | ------------------ |
 | `UNIT_LOG_TYPE`          | Unit log type `file` `console`          | `FILE`             |
