@@ -1,7 +1,6 @@
 # github.com/tiredofit/docker-unit
 
 [![GitHub release](https://img.shields.io/github/v/tag/tiredofit/docker-unit?style=flat-square)](https://github.com/tiredofit/docker-unit/releases)
-[![Build Status](https://img.shields.io/github/workflow/status/tiredofit/docker-unit/build?style=flat-square)](https://github.com/tiredofit/docker-unit/actions?query=workflow%3Abuild)
 [![Docker Stars](https://img.shields.io/docker/stars/tiredofit/unit.svg?style=flat-square&logo=docker)](https://hub.docker.com/r/tiredofit/unit/)
 [![Docker Pulls](https://img.shields.io/docker/pulls/tiredofit/unit.svg?style=flat-square&logo=docker)](https://hub.docker.com/r/tiredofit/unit/)
 [![Become a sponsor](https://img.shields.io/badge/sponsor-tiredofit-181717.svg?logo=github&style=flat-square)](https://github.com/sponsors/tiredofit)
