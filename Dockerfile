@@ -17,7 +17,6 @@ ENV UNIT_VERSION=1.31.0-1 \
 
 RUN source assets/functions/00-container && \
     set -x && \
-    echo "DEBUG: PHP BASE IS ${PHP_BASE}" && \
     case "${PHP_BASE}" in \
        8.2 ) export php_abbrev="82";; \
        8.1 ) export php_abbrev="81";; \
@@ -29,7 +28,8 @@ RUN source assets/functions/00-container && \
         3.12 | 3.15 | 3.16 ) php_packages="php${php_abbrev}-dev php${php_abbrev}-embed" ; _php_config="./configure php --module=php${php_abbrev} --config=php-config${php_abbrev}" ;; \
         *) php_packages="php82-dev php82-embed php81-dev php81-embed" ; _php_config="./configure php --module=php81 --config=php-config81" ; _php_config2="./configure php --module=php82 --config=php-config82" ;  ;; \
     esac ; \
-    ${test} && \
+    sed -i "/www-data/d" /etc/group* && \
+    addgroup -S -g 82 ${UNIT_GROUP} && \
     adduser -D -S -s /sbin/nologin \
             -h /var/lib/unit \
             -G "${UNIT_GROUP}" \
