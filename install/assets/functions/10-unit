@@ -43,7 +43,6 @@ unit_bootstrap_filesystem() {
 
 unit_configure_instance() {
     _unit_configure_log_format() {
-
         print_debug "Updating access_log/logformat settings"
         case "${UNIT_LOG_TYPE,,}" in
             file)
@@ -128,7 +127,7 @@ unit_configure_site() {
    ]
 EOF
 
-            # Not entirely working yet
+            # Not entirely working yet - Does it need to? Probably just for cool factor.
             #yq -nP  '
             #            .listeners."'$(echo "${UNIT_LISTEN_IP}:${UNIT_LISTEN_PORT}")'".pass="routes" |
             #            .routes.action.share = "'$(echo "${UNIT_WEBROOT}")'/$uri"
@@ -206,8 +205,6 @@ unit_post_init() {
                     unit_site_enable "${site}"
                 done
             fi
-        #else
-            #unit_site_enable all
         fi
     fi
 
