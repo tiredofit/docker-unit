@@ -62,7 +62,7 @@ print_debug "Loading access_log config"
 /usr/bin/unit-control import access_log silent
 
 print_debug "Loading enabled sites"
-/usr/bin/unit-control import sites
+/usr/bin/unit-control import sites silent
 
 s6-svc -d /var/run/s6/legacy-services/11-unit_configure
 EOF
@@ -72,7 +72,10 @@ chmod +x  /etc/services.available/11-unit_configure/run
 
 
 unit_configure_instance() {
-    _unit_configure_log_format() {set -x
+    _unit_configure_log_format() {
+        print_debug "Updating access_log/logformat settings"
+        case "${UNIT_LOG_TYPE,,}" in
+            file)
                 create_logrotate unit "${UNIT_LOG_ACCESS_PATH}"/"${UNIT_LOG_ACCESS_FILE}" unit "${UNIT_USER}" "${UNIT_GROUP}"
             ;;
         esac
@@ -129,6 +132,7 @@ EOF
 
             # Not entirely working yet
             #yq -nP  '
+            #            .listeners."'$(echo "${UNIT_LISTEN_IP}:${UNIT_LISTEN_PORT}")'".pass="routes" |
             #            .routes.action.share = "'$(echo "${UNIT_WEBROOT}")'/$uri"
             #        ' -o json > /etc/unit/sites.available/default.json
         fi
@@ -137,15 +141,19 @@ EOF
     _unit_configure_site_targetted() {
         update_template /etc/unit/sites.available/${1}-listener.json \
                                                             UNIT_LISTEN_IP \
-                                                            UNIT_LISTEN_PORT
+                                                            UNIT_LISTEN_PORT \
+                                                            UNIT_SITE_ENABLED
 
         update_template /etc/unit/sites.available/${1}-upstream.json \
-                                                            UNIT_ONE_DAY
+                                                            UNIT_UPSTREAM_HOST \
+                                                            UNIT_SITE_ENABLED
 
         update_template /etc/unit/sites.available/${1}-route.json \
+                                                            UNIT_SITE_ENABLED \
                                                             UNIT_WEBROOT
 
         update_template /etc/unit/sites.available/${1}-application.json \
+                                                            UNIT_SITE_ENABLED \
                                                             UNIT_WEBROOT
     }
 
@@ -200,8 +208,8 @@ unit_post_init() {
                     unit_site_enable "${site}"
                 done
             fi
-        else
-            unit_site_enable all
+        #else
+            #unit_site_enable all
         fi
     fi
 

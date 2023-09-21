@@ -91,6 +91,28 @@ This image expects that you place 3+ files into the `/etc/unit/sites.available` 
 
 See the [Unit Configuration](https://unit.nginx.org/configuration/) to understand how this works.
 
+Sample `site-listener.json` file:
+
+```
+{
+  "{{ UNIT_LISTEN_IP }}:{{ UNIT_LISTEN_PORT }}": {
+    "pass": "routes"
+  }
+}
+```
+
+Sample `site-route.json` file:
+
+```
+   [
+      {
+         "action":{
+            "share": "{{ UNIT_WEBROOT }}/$uri"
+         }
+      }
+   ]
+```
+
 If you do not create any configuration, a default configuration will be created, and a sample HTML page will be generated if requested to show that the server is working.
 
 ### Persistent Storage
