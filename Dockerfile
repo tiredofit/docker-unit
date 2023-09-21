@@ -17,6 +17,7 @@ ENV UNIT_VERSION=1.31.0-1 \
 
 RUN source assets/functions/00-container && \
     set -x && \
+    echo "DEBUG: PHP BASE IS ${PHP_BASE}" && \
     case "${PHP_BASE}" in \
        8.2 ) export php_abbrev="82";; \
        8.1 ) export php_abbrev="81";; \
