@@ -201,15 +201,17 @@ Be sure to view the following repositories to understand all the customizable op
 | `UNIT_APPLICATION_PROCESS_TIMEOUT` | (dynamic) Timeout in seconds to phase out process                         | `20`     |
 
 #### Constraints
-| Variable                     | Value                          | Default      |
-| ---------------------------- | ------------------------------ | ------------ |
-| `UNIT_DISCARD_UNSAFE_FIELDS` | Disable serving unsafe fields  | `TRUE`       |
-| `UNIT_ENABLE_SERVER_VERSION` | Reveal Unit version in headers | `TRUE`       |
-| `UNIT_MAX_BODY_SIZE`         | Max body size in bytes         | `2147483648` |
-| `UNIT_TIMEOUT_BODY_READ`     | Body read timeout in seconds   | `180`        |
-| `UNIT_TIMEOUT_BODY_SEND`     | Body send timeout in seconds   | `180`        |
-| `UNIT_TIMEOUT_HEADER_READ`   | Header read timeout in seconds | `180`        |
-| `UNIT_TIMEOUT_IDLE`          | Idle time in seconds           | `30`         |
+| Variable                            | Value                                                                                      | Default                                   |
+| ----------------------------------- | ------------------------------------------------------------------------------------------ | ----------------------------------------- |
+| `UNIT_DISCARD_UNSAFE_FIELDS`        | Disable serving unsafe fields                                                              | `TRUE`                                    |
+| `UNIT_ENABLE_SERVER_VERSION`        | Reveal Unit version in headers                                                             | `TRUE`                                    |
+| `UNIT_ENABLE_XFORWARDED_PROTOCOL`   | Allow to pass X-Forwarded Protocol header downstream - Useful when using SSL reverse proxy | `TRUE`                                    |
+| `UNIT_ENABLE_XFORWARDED_PROTOCOL_IP | Comma seperated list of ip, networks to forward header                                     | `10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` |
+| `UNIT_MAX_BODY_SIZE`                | Max body size in bytes                                                                     | `2147483648`                              |
+| `UNIT_TIMEOUT_BODY_READ`            | Body read timeout in seconds                                                               | `180`                                     |
+| `UNIT_TIMEOUT_BODY_SEND`            | Body send timeout in seconds                                                               | `180`                                     |
+| `UNIT_TIMEOUT_HEADER_READ`          | Header read timeout in seconds                                                             | `180`                                     |
+| `UNIT_TIMEOUT_IDLE`                 | Idle time in seconds                                                                       | `30`                                      |
 
 
 ### Networking

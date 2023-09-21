@@ -132,6 +132,21 @@ unit_configure_site() {
         fi
     }
 
+    _unit_configure_listener() {
+        if var_true "${UNIT_ENABLE_XFORWARDED_PROTOCOL}" ; then
+            xforward_proto_array=$(echo "${UNIT_XFORWARDED_PROTOCOL_IP}" | tr "," "\n")
+
+            for ip in $xforward_proto_array; do
+                export xforward_proto_prepared="${xforward_proto_prepared},\"${ip}\""
+            done
+
+            yq -iP  '
+                        .*.forwarded.protocol="X-Forwarded-Proto" |
+                        .*.forwarded.source=['$(echo "${xforward_proto_prepared}" | sed "s|^,||g")']
+                    ' -o json "${1}".json
+        fi
+    }
+
     _unit_configure_site_default() {
         if [ -z "${UNIT_SITE_ENABLED}" ] && [ ! -f "/etc/unit/sites.available/default-listener.json" ] && [ ! -f "/etc/cont-init.d/20-unit-php" ] ; then
             UNIT_SITE_ENABLED=default
@@ -154,6 +169,7 @@ EOF
             #            .listeners."'$(echo "${UNIT_LISTEN_IP}:${UNIT_LISTEN_PORT}")'".pass="routes" |
             #            .routes.action.share = "'$(echo "${UNIT_WEBROOT}")'/$uri"
             #        ' -o json > /etc/unit/sites.available/default.json
+            _unit_configure_listener /etc/unit/sites.available/default-listener
         fi
     }
 
@@ -189,6 +205,10 @@ EOF
                 for application in /etc/unit/sites.available/*-application.json ; do
                     _unit_configure_application "${application}"
                 done
+
+                for listener in /etc/unit/sites.available/*-listener.json ; do
+                    _unit_configure_listener "${listener}"
+                done
             ;;
             *)
                 if compgen -G "/etc/unit/sites.available/${1}*.json" >/dev/null ; then
@@ -198,6 +218,10 @@ EOF
                 if compgen -G "/etc/unit/sites.available/${1}-application.json" >/dev/null ; then
                     _unit_configure_application /etc/unit/sites.available/"${1}"-application.json
                 fi
+
+                if compgen -G "/etc/unit/sites.available/${1}-listener.json" >/dev/null ; then
+                    _unit_configure_listener /etc/unit/sites.available/"${1}"-listener.json
+                fi
             ;;
         esac
     else
@@ -206,6 +230,10 @@ EOF
             if compgen -G "/etc/unit/sites.available/${UNIT_SITE_ENABLED}-application.json" >/dev/null ; then
                 _unit_configure_application /etc/unit/sites.available/"${UNIT_SITE_ENABLED}"-application.json
             fi
+            if compgen -G "/etc/unit/sites.available/${UNIT_SITE_ENABLED}-listener.json" >/dev/null ; then
+                _unit_configure_listener /etc/unit/sites.available/"${UNIT_SITE_ENABLED}"-listener.json
+            fi
+
         else
             _unit_configure_site_default
         fi
