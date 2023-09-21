@@ -24,8 +24,9 @@ RUN source assets/functions/00-container && \
     esac ; \
     case "$(cat /etc/os-release | grep VERSION_ID | cut -d = -f 2 | cut -d . -f 1,2 | cut -d _ -f 1)" in \
         3.12 | 3.15 | 3.16 ) php_packages="php${php_abbrev}-dev php${php_abbrev}-embed" ; _php_config="./configure php --module=php${php_abbrev} --config=php-config${php-abbrev}" ;; \
-        *) php_packages="php82-dev php82-embed php81-dev php81-embed" ; _php_config="./configure php --module=php81 --config=php-config81  ./configure php --module=php82 --config=php-config82"   ;; \
+        *) php_packages="php82-dev php82-embed php81-dev php81-embed" ; _php_config="./configure php --module=php81 --config=php-config81" ; _php_config2="./configure php --module=php82 --config=php-config82" ;  ;; \
     esac ; \
+    ${test} && \
     adduser -D -S -s /sbin/nologin \
             -h /var/lib/unit \
             -G "${UNIT_GROUP}" \
@@ -76,7 +77,7 @@ RUN source assets/functions/00-container && \
         && \
     ./configure nodejs && \
     ./configure perl && \
-    ${_php_config} && \
+    ${_php_config} ; ${_php_config2} && \
     ./configure python --config=python3-config && \
     ./configure ruby && \
     make -j $(nproc) && \
