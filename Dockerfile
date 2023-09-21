@@ -4,7 +4,9 @@ ARG DISTRO_VARIANT=3.18
 FROM docker.io/tiredofit/${DISTRO}:${DISTRO_VARIANT}
 LABEL maintainer="Dave Conroy (github.com/tiredofit)"
 
+ARG PHP_BASE=8.2
 ARG UNIT_VERSION
+
 
 ENV UNIT_VERSION=1.31.0-1 \
     UNIT_USER=unit \
@@ -16,6 +18,14 @@ ENV UNIT_VERSION=1.31.0-1 \
 
 RUN source assets/functions/00-container && \
     set -x && \
+    case "${PHP_BASE}" in \
+       8.2 ) export php_abbrev="82";; \
+       8.1 ) export php_abbrev="81";; \
+    esac ; \
+    case "$(cat /etc/os-release | grep VERSION_ID | cut -d = -f 2 | cut -d . -f 1,2 | cut -d _ -f 1)" in \
+        3.12 | 3.15 | 3.16 ) php_packages="php${php_abbrev}-dev php${php_abbrev}-embed" ; _php_config="./configure php --module=php${php_abbrev} --config=php-config${php-abbrev}" ;; \
+        *) php_packages="php82-dev php82-embed php81-dev php81-embed" ; _php_config="./configure php --module=php81 --config=php-config81  ./configure php --module=php82 --config=php-config82"   ;; \
+    esac ; \
     adduser -D -S -s /sbin/nologin \
             -h /var/lib/unit \
             -G "${UNIT_GROUP}" \
@@ -31,13 +41,14 @@ RUN source assets/functions/00-container && \
                     build-base \
                     git \
                     linux-headers \
-	                openssl-dev \
+	                nodejs \
+                    npm \
+                    openssl-dev \
                     pcre-dev \
-                    #perl-dev \
-                	php82-dev \
-                	php82-embed \
-                	#python3-dev \
-                	#ruby-dev \
+                    perl-dev \
+                	${php_packages} \
+                	python3-dev \
+                	ruby-dev \
                     && \
     \
     package install .unit-run-deps \
@@ -63,11 +74,12 @@ RUN source assets/functions/00-container && \
         $(if [ -f "/unit-assets/configure-args" ] ; then echo "/unit-assets/configure-args" ; fi;) \
         --tests \
         && \
-    #./configure perl && \
-    ./configure php --module=php82 --config=php-config82 && \
-    #./configure python --config=python3-config && \
-    #./configure ruby && \
-	make -j $(nproc) && \
+    ./configure nodejs && \
+    ./configure perl && \
+    ${_php_config} && \
+    ./configure python --config=python3-config && \
+    ./configure ruby && \
+    make -j $(nproc) && \
 	make tests && \
     make install && \
     strip /usr/sbin/unitd && \
@@ -80,7 +92,9 @@ RUN source assets/functions/00-container && \
                 /etc/unit/sites.enabled \
                 /etc/unit/snippets \
                 && \
-    rm -rf /usr/src/*
+    rm -rf /root/.cache \
+           /root/.npm \
+           /usr/src/*
 
 EXPOSE 80
 
