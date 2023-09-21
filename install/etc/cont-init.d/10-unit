@@ -8,14 +8,15 @@ PROCESS_NAME="unit"
 
 if [ ! -f "/tmp/.container/container-restart" ] ; then
     unit_bootstrap_filesystem
-        unit_configure_instance
-        unit_configure_monitoring
-        if var_true "${UNIT_ENABLE_APPLICATION_CONFIGURATION}"; then
-            unit_configure_site
-            if var_true "${UNIT_ENABLE_CREATE_SAMPLE_HTML}" ; then unit_create_sample_html ; fi
-        else
-            print_notice "Not configurating Website configuration files"
-        fi
+    unit_configure_instance
+    unit_configure_monitoring
+    if var_true "${UNIT_ENABLE_APPLICATION_CONFIGURATION}"; then
+        unit_configure_site
+        if var_true "${UNIT_ENABLE_CREATE_SAMPLE_HTML}" ; then unit_create_sample_html ; fi
+    else
+        print_notice "Not configurating Website configuration files"
+    fi
+    unit_post_init
 fi
 
 liftoff
