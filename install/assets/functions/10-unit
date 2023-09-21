@@ -41,36 +41,6 @@ unit_bootstrap_filesystem() {
     if [ "$(stat -c %U "${UNIT_STATE_PATH}")" != "${UNIT_USER}" ] ; then chown "${UNIT_USER}":"${UNIT_GROUP}" "${UNIT_STATE_PATH}" ; fi
 }
 
-unit_create_configure_import_script() {
-    mkdir -p  /etc/services.available/11-unit_configure
-    cat <<EOF > /etc/services.available/11-unit_configure/run
-#!/command/with-contenv bash
-
-source /assets/functions/00-container
-PROCESS_NAME="unit_configure"
-check_container_initialized
-check_service_initialized init 10-unit
-source /assets/defaults/10-unit
-
-until pids=$(pidof unitd) ; do sleep 0.1 ; done
-until /usr/bin/unit-control test > /dev/null 2>&1; do sleep 0.1; done
-
-print_debug "Loading unit config"
-/usr/bin/unit-control import unit silent
-
-print_debug "Loading access_log config"
-/usr/bin/unit-control import access_log silent
-
-print_debug "Loading enabled sites"
-/usr/bin/unit-control import sites silent
-
-s6-svc -d /var/run/s6/legacy-services/11-unit_configure
-EOF
-
-chmod +x  /etc/services.available/11-unit_configure/run
-}
-
-
 unit_configure_instance() {
     _unit_configure_log_format() {
         print_debug "Updating access_log/logformat settings"
@@ -110,6 +80,33 @@ unit_configure_instance() {
 
     _unit_configure_log_format
     _unit_configure_settings
+}
+
+unit_configure_monitoring() {
+    if var_true "${CONTAINER_ENABLE_MONITORING}" && [ "${CONTAINER_MONITORING_BACKEND,,}" = "zabbix" ]; then
+        source /assets/defaults/03-monitoring
+
+        case "${UNIT_CONTROL_TYPE,,}" in
+        ip)
+            _monitor_control="http://${_unit_control}/status"
+        ;;
+        socket)
+            _monitor_control="--unix-socket $(echo "${_unit_control}" | sed "s|unix:/||g") http://tiredofit/status"
+        ;;
+        esac
+
+        cat <<EOF > "${ZABBIX_CONFIG_PATH}"/"${ZABBIX_CONFIG_FILE}.d"/tiredofit_unit.conf
+# Zabbix Unit Configuration - Automatically Generated
+# Find Companion Zabbix Server Templates at https://github.com/tiredofit/docker-unit
+# Autoregister=unit
+
+UserParameter=unit.get_statistics,curl -s -X GET ${_monitor_control}
+UserParameter=unit.version,unitd --version 2>/tmp/.container/unit.version ; head -n1 /tmp/.container/unit.version | awk '{print $3}'
+EOF
+
+        chmod 700 "${ZABBIX_CONFIG_PATH}"/"${ZABBIX_CONFIG_FILE}.d"/tiredofit_mariadb.conf
+        chown zabbix:root "${ZABBIX_CONFIG_PATH}"/"${ZABBIX_CONFIG_FILE}.d"/tiredofit_mariadb.conf
+    fi
 }
 
 unit_configure_site() {
