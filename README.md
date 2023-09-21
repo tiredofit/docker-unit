@@ -191,15 +191,15 @@ Be sure to view the following repositories to understand all the customizable op
 
 
 #### Constraints
-| Variable                     | Value                          | Default   |
-| ---------------------------- | ------------------------------ | --------- |
-| `UNIT_DISCARD_UNSAFE_FIELDS` | Disable serving unsafe fields  | `TRUE`    |
-| `UNIT_ENABLE_SERVER_VERSION` | Reveal Unit version in headers | `TRUE`    |
-| `UNIT_MAX_BODY_SIZE`         | Max body size in bytes         | `8388608` |
-| `UNIT_TIMEOUT_BODY_READ`     | Body read timeout in seconds   | `30`      |
-| `UNIT_TIMEOUT_BODY_SEND`     | Body send timeout in seconds   | `30`      |
-| `UNIT_TIMEOUT_HEADER_READ`   | Header read timeout in seconds | `30`      |
-| `UNIT_TIMEOUT_IDLE`          | Idle time in seconds           | `30`      |
+| Variable                     | Value                          | Default      |
+| ---------------------------- | ------------------------------ | ------------ |
+| `UNIT_DISCARD_UNSAFE_FIELDS` | Disable serving unsafe fields  | `TRUE`       |
+| `UNIT_ENABLE_SERVER_VERSION` | Reveal Unit version in headers | `TRUE`       |
+| `UNIT_MAX_BODY_SIZE`         | Max body size in bytes         | `2147483648` |
+| `UNIT_TIMEOUT_BODY_READ`     | Body read timeout in seconds   | `180`        |
+| `UNIT_TIMEOUT_BODY_SEND`     | Body send timeout in seconds   | `180`        |
+| `UNIT_TIMEOUT_HEADER_READ`   | Header read timeout in seconds | `180`        |
+| `UNIT_TIMEOUT_IDLE`          | Idle time in seconds           | `30`         |
 
 
 ### Networking
