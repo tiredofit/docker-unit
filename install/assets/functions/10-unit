@@ -170,13 +170,13 @@ EOF
             ;;
             *)
                 if compgen -G "/etc/unit/sites.available/${1}*.json" >/dev/null ; then
-                    _unit_configure_site_targetted /etc/unit/sites.available/"${1}".json
+                    _unit_configure_site_targetted "${1}"
                 fi
             ;;
         esac
     else
         if [ -n "${UNIT_SITE_ENABLED}" ]; then
-            _unit_configure_site_targetted /etc/unit/sites.available/"${1}".json
+            _unit_configure_site_targetted "${UNIT_SITE_ENABLED}"
         else
             _unit_configure_site_default
         fi

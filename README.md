@@ -95,7 +95,7 @@ Sample `site-listener.json` file:
 
 ```
 {
-  "{{ UNIT_LISTEN_IP }}:{{ UNIT_LISTEN_PORT }}": {
+  "{{UNIT_LISTEN_IP}}:{{UNIT_LISTEN_PORT}}": {
     "pass": "routes"
   }
 }
@@ -107,7 +107,7 @@ Sample `site-route.json` file:
    [
       {
          "action":{
-            "share": "{{ UNIT_WEBROOT }}/$uri"
+            "share": "{{UNIT_WEBROOT}}/$uri"
          }
       }
    ]
