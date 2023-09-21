@@ -71,7 +71,7 @@ RUN source assets/functions/00-container && \
 		--log="/var/log/unit/unit.log" \
 		--mandir=/usr/src/unit.tmp \
 		--modulesdir="/usr/lib/unit/modules" \
-                --tmpdir=/tmp \
+        --tmpdir=/tmp \
 		--openssl \
 		--user="${UNIT_USER}" \
 		--group="${UNIT_GROUP}" \
