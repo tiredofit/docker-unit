@@ -6,20 +6,21 @@ check_container_initialized
 check_service_initialized init 10-unit
 source /assets/defaults/10-unit
 
+if var_true "${UNIT_ENABLE_APPLICATION_CONFIGURATION}" ; then
+    until pids=$(pidof unitd) ; do sleep 0.1 ; done
+    until /usr/bin/unit-control test > /dev/null 2>&1; do sleep 0.1; done
 
-until pids=$(pidof unitd) ; do sleep 0.1 ; done
-until /usr/bin/unit-control test > /dev/null 2>&1; do sleep 0.1; done
+    print_debug "Loading unit config"
+    /usr/bin/unit-control import unit silent
 
-print_debug "Loading unit config"
-/usr/bin/unit-control import unit silent
+    print_debug "Loading access_log config"
+    /usr/bin/unit-control import access_log silent
 
-print_debug "Loading access_log config"
-/usr/bin/unit-control import access_log silent
+    print_debug "Loading enabled sites"
+    /usr/bin/unit-control import sites silent
+fi
 
-print_debug "Loading enabled sites"
-/usr/bin/unit-control import sites silent
-
-if var_true "${CONTAINER_ENABLE_MONITORING}" && [ "${CONTAINER_MONITORING_BACKEND,,}" = "zabbix" ] && [ "${UNIT_CONTROL_TYPE,,}" = "socket" ]; then
+if var_true "${CONTAINER_ENABLE_MONITORING}" && [ "${CONTAINER_MONITORING_BACKEND,,}" = "zabbix" ] && [ "${UNIT_CONTROL_TYPE,,}" = "socket"]; then
     source /assets/defaults/03-monitoring
     chown root:"${ZABBIX_USER}" "${UNIT_CONTROL_SOCKET_PATH}"/"${UNIT_CONTROL_SOCKET_NAME}"
     chmod 660 "${UNIT_CONTROL_SOCKET_PATH}"/"${UNIT_CONTROL_SOCKET_NAME}"
