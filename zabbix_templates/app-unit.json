@@ -1,0 +1,331 @@
+{
+    "zabbix_export": {
+        "version": "6.4",
+        "template_groups": [
+            {
+                "uuid": "a571c0d144b14fd4a87a9d9b2aa9fcd6",
+                "name": "Templates/Applications"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "4efb058a767442c0b8eb0890c2975112",
+                "template": "Unit",
+                "name": "Unit",
+                "description": "Get metrics from Unit Webserver \nhttps://unit.nginx.org/usagestats/\n\nThis is designed specifically for https://github.com/tiredofit/docker-unit/ and its associated base images. Tested on Unit 1.31.0",
+                "groups": [
+                    {
+                        "name": "Templates/Applications"
+                    }
+                ],
+                "items": [
+                    {
+                        "uuid": "db78ebb74a364c88b78ae8fbe278847f",
+                        "name": "Unit: CPU utilization",
+                        "type": "ZABBIX_ACTIVE",
+                        "key": "proc.cpu.util[unitd]",
+                        "history": "7d",
+                        "value_type": "FLOAT",
+                        "units": "%",
+                        "description": "Process CPU utilization percentage.",
+                        "tags": [
+                            {
+                                "tag": "Application",
+                                "value": "Unit"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "3a2a614933044bbfa1fd73bc41ad3f9d",
+                        "name": "Unit: Memory usage (Physical)",
+                        "type": "ZABBIX_ACTIVE",
+                        "key": "proc.mem[unitd,,,,rss]",
+                        "history": "7d",
+                        "units": "B",
+                        "description": "Resident set size memory used by process in bytes.",
+                        "tags": [
+                            {
+                                "tag": "Application",
+                                "value": "Unit"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "a4f7fc2f88df47709dd48debd18628a3",
+                        "name": "Unit: Memory usage (Virtual)",
+                        "type": "ZABBIX_ACTIVE",
+                        "key": "proc.mem[unitd,,,,vsize]",
+                        "history": "7d",
+                        "units": "B",
+                        "description": "Virtual memory size used by process in bytes.",
+                        "tags": [
+                            {
+                                "tag": "Application",
+                                "value": "Unit"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "4256f00aa7344e7c9c3578a3313d9b1b",
+                        "name": "Unit: Number of controller processes",
+                        "type": "ZABBIX_ACTIVE",
+                        "key": "proc.num[unitd,,,controller]",
+                        "history": "7d",
+                        "description": "Number of the Unit controller processes running.",
+                        "tags": [
+                            {
+                                "tag": "Application",
+                                "value": "Unit"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "8b211a957fea44b9bb3663861a71928b",
+                        "name": "Unit: Number of main processes",
+                        "type": "ZABBIX_ACTIVE",
+                        "key": "proc.num[unitd,,,main]",
+                        "history": "7d",
+                        "description": "Number of the Unit main processes running.",
+                        "tags": [
+                            {
+                                "tag": "Application",
+                                "value": "Unit"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "04c2a0f0ddf64f41b66406a001c24229",
+                        "name": "Unit: Number of router processes",
+                        "type": "ZABBIX_ACTIVE",
+                        "key": "proc.num[unitd,,,router]",
+                        "history": "7d",
+                        "description": "Number of the Unit router processes running.",
+                        "tags": [
+                            {
+                                "tag": "Application",
+                                "value": "Unit"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "486cf8feb41943a2b38b79ab4c2c95e0",
+                        "name": "Unit: Connections - Accepted",
+                        "type": "DEPENDENT",
+                        "key": "unit.connections.accepted",
+                        "delay": "0",
+                        "history": "7d",
+                        "description": "Total accepted connections during the instance\u2019s lifetime.",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.connections.accepted"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "unit.get_statistics"
+                        }
+                    },
+                    {
+                        "uuid": "c1ffd175e8ce4f30a000eb95daf8aa20",
+                        "name": "Unit: Connections - Active",
+                        "type": "DEPENDENT",
+                        "key": "unit.connections.active",
+                        "delay": "0",
+                        "history": "7d",
+                        "description": "Current active connections for the instance",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.connections.active"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "unit.get_statistics"
+                        }
+                    },
+                    {
+                        "uuid": "c522c377833744f0b32bd356084819af",
+                        "name": "Unit: Connections - Closed",
+                        "type": "DEPENDENT",
+                        "key": "unit.connections.closed",
+                        "delay": "0",
+                        "history": "7d",
+                        "description": "Total closed connections during the instance\u2019s lifetime",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.connections.closed"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "unit.get_statistics"
+                        }
+                    },
+                    {
+                        "uuid": "9fbfc51a37ad4d11bd68861aae898c72",
+                        "name": "Unit: Connections - Idle",
+                        "type": "DEPENDENT",
+                        "key": "unit.connections.idle",
+                        "delay": "0",
+                        "history": "7d",
+                        "description": "Current idle connections for the instance.",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.connections.idle"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "unit.get_statistics"
+                        }
+                    },
+                    {
+                        "uuid": "a76af1c6290744e6ae7b35a021fde5c2",
+                        "name": "Unit: Get statistics",
+                        "type": "ZABBIX_ACTIVE",
+                        "key": "unit.get_statistics",
+                        "delay": "30s",
+                        "history": "0",
+                        "trends": "0",
+                        "value_type": "TEXT"
+                    },
+                    {
+                        "uuid": "34e58afff1904bc2a83cfb2dfbd56215",
+                        "name": "Unit: Requests - Total",
+                        "type": "DEPENDENT",
+                        "key": "unit.requests.total",
+                        "delay": "0",
+                        "history": "7d",
+                        "description": "Total non-API requests during the instance\u2019s lifetime",
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.requests.total"
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "unit.get_statistics"
+                        }
+                    },
+                    {
+                        "uuid": "dbf9c2cb699f47a7a27cb87176a2f111",
+                        "name": "Unit: Version",
+                        "type": "ZABBIX_ACTIVE",
+                        "key": "unit.version",
+                        "history": "7d",
+                        "trends": "0",
+                        "value_type": "CHAR",
+                        "description": "Runtime version of Unit",
+                        "tags": [
+                            {
+                                "tag": "Application",
+                                "value": "Unit"
+                            }
+                        ]
+                    }
+                ],
+                "tags": [
+                    {
+                        "tag": "Service",
+                        "value": "Webserver"
+                    }
+                ]
+            }
+        ],
+        "graphs": [
+            {
+                "uuid": "7963e5a6780d470d9727e0708cc84c19",
+                "name": "Unit: CPU",
+                "graph_items": [
+                    {
+                        "color": "199C0D",
+                        "calc_fnc": "ALL",
+                        "item": {
+                            "host": "Unit",
+                            "key": "proc.cpu.util[unitd]"
+                        }
+                    }
+                ]
+            },
+            {
+                "uuid": "b2467850df034feaa4262f8f0009f7c7",
+                "name": "Unit: Instance Connections",
+                "graph_items": [
+                    {
+                        "color": "199C0D",
+                        "calc_fnc": "ALL",
+                        "item": {
+                            "host": "Unit",
+                            "key": "unit.connections.accepted"
+                        }
+                    },
+                    {
+                        "sortorder": "1",
+                        "color": "F63100",
+                        "calc_fnc": "ALL",
+                        "item": {
+                            "host": "Unit",
+                            "key": "unit.connections.active"
+                        }
+                    },
+                    {
+                        "sortorder": "2",
+                        "color": "2774A4",
+                        "calc_fnc": "ALL",
+                        "item": {
+                            "host": "Unit",
+                            "key": "unit.connections.closed"
+                        }
+                    },
+                    {
+                        "sortorder": "3",
+                        "color": "F7941D",
+                        "calc_fnc": "ALL",
+                        "item": {
+                            "host": "Unit",
+                            "key": "unit.connections.idle"
+                        }
+                    }
+                ]
+            },
+            {
+                "uuid": "408ceff60e554049af32832630d6d695",
+                "name": "Unit: Instance Requests",
+                "graph_items": [
+                    {
+                        "color": "199C0D",
+                        "calc_fnc": "ALL",
+                        "item": {
+                            "host": "Unit",
+                            "key": "unit.requests.total"
+                        }
+                    }
+                ]
+            },
+            {
+                "uuid": "df1c836bca0b45d1a251afb387df2c78",
+                "name": "Unit: Memory",
+                "graph_items": [
+                    {
+                        "color": "199C0D",
+                        "calc_fnc": "ALL",
+                        "item": {
+                            "host": "Unit",
+                            "key": "proc.mem[unitd,,,,vsize]"
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}

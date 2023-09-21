@@ -20,7 +20,7 @@ if var_true "${UNIT_ENABLE_APPLICATION_CONFIGURATION}" ; then
     /usr/bin/unit-control import sites silent
 fi
 
-if var_true "${CONTAINER_ENABLE_MONITORING}" && [ "${CONTAINER_MONITORING_BACKEND,,}" = "zabbix" ] && [ "${UNIT_CONTROL_TYPE,,}" = "socket"]; then
+if var_true "${CONTAINER_ENABLE_MONITORING}" && [ "${CONTAINER_MONITORING_BACKEND,,}" = "zabbix" ] && [ "${UNIT_CONTROL_TYPE,,}" = "socket" ]; then
     source /assets/defaults/03-monitoring
     chown root:"${ZABBIX_USER}" "${UNIT_CONTROL_SOCKET_PATH}"/"${UNIT_CONTROL_SOCKET_NAME}"
     chmod 660 "${UNIT_CONTROL_SOCKET_PATH}"/"${UNIT_CONTROL_SOCKET_NAME}"
