@@ -20,6 +20,9 @@ RUN source assets/functions/00-container && \
     case "${PHP_BASE}" in \
        8.2 ) export php_abbrev="82";; \
        8.1 ) export php_abbrev="81";; \
+       8 ) export php_abbrev="8";; \
+       7.4 ) export php_abbrev="7";; \
+       7.3 ) export php_abbrev="7";; \
     esac ; \
     case "$(cat /etc/os-release | grep VERSION_ID | cut -d = -f 2 | cut -d . -f 1,2 | cut -d _ -f 1)" in \
         3.12 | 3.15 | 3.16 ) php_packages="php${php_abbrev}-dev php${php_abbrev}-embed" ; _php_config="./configure php --module=php${php_abbrev} --config=php-config${php-abbrev}" ;; \
