@@ -203,6 +203,9 @@ EOF
     else
         if [ -n "${UNIT_SITE_ENABLED}" ]; then
             _unit_configure_site_targetted "${UNIT_SITE_ENABLED}"
+            if compgen -G "/etc/unit/sites.available/${UNIT_SITE_ENABLED}-application.json" >/dev/null ; then
+                _unit_configure_application /etc/unit/sites.available/"${UNIT_SITE_ENABLED}"-application.json
+            fi
         else
             _unit_configure_site_default
         fi
