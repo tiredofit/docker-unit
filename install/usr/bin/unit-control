@@ -50,7 +50,12 @@ case "${1,,}" in
                     ${_prefix} curl -X PUT --data-binary @/etc/unit/snippets/unit.json ${_unit_control}/settings
                 ;;
                 sites)
-                    # Routes need to go before listeners otherwise face a listener error!
+                    # Applications and Routes need to go before listeners otherwise face a listener error!
+                    if compgen -G "/etc/unit/sites.enabled/*-application.json" >/dev/null ; then
+                        for site_application in /etc/unit/sites.enabled/*-application.json; do
+                            ${_prefix} curl -X PUT --data-binary @${site_application} ${_unit_control}/applications
+                        done
+                    fi
                     if compgen -G "/etc/unit/sites.enabled/*-route.json" >/dev/null ; then
                         for site_route in /etc/unit/sites.enabled/*-route.json; do
                             ${_prefix} curl -X PUT --data-binary @${site_route} ${_unit_control}/routes
@@ -59,11 +64,6 @@ case "${1,,}" in
                     if compgen -G "/etc/unit/sites.enabled/*-upstream.json" >/dev/null ; then
                         for site_upstream in /etc/unit/sites.enabled/*-upstream.json; do
                             ${_prefix} curl -X PUT --data-binary @${site_upstream} ${_unit_control}/upstreams
-                        done
-                    fi
-                    if compgen -G "/etc/unit/sites.enabled/*-application.json" >/dev/null ; then
-                        for site_application in /etc/unit/sites.enabled/*-application.json; do
-                            ${_prefix} curl -X PUT --data-binary @${site_application} ${_unit_control}/applications
                         done
                     fi
                     if compgen -G "/etc/unit/sites.enabled/*-listener.json" >/dev/null ; then
@@ -76,7 +76,12 @@ case "${1,,}" in
                     ${_prefix} curl -X PUT --data-binary @/etc/unit/snippets/unit.json ${_unit_control}/settings
                     ${_prefix} curl -X PUT --data-binary @/etc/unit/snippets/logformat/${UNIT_LOG_ACCESS_FORMAT,,}.json ${_unit_control}/access_log
 
-                    # Routes need to go before listeners otherwise face a listener error!
+                    # Applications and Routes need to go before listeners otherwise face a listener error!
+                    if compgen -G "/etc/unit/sites.enabled/*-application.json" >/dev/null ; then
+                        for site_application in /etc/unit/sites.enabled/*-application.json; do
+                            ${_prefix} curl -X PUT --data-binary @${site_application} ${_unit_control}/applications
+                        done
+                    fi
                     if compgen -G "/etc/unit/sites.enabled/*-route.json" >/dev/null ; then
                         for site_route in /etc/unit/sites.enabled/*-route.json; do
                             ${_prefix} curl -X PUT --data-binary @${site_route} ${_unit_control}/routes
@@ -85,11 +90,6 @@ case "${1,,}" in
                     if compgen -G "/etc/unit/sites.enabled/*-upstream.json" >/dev/null ; then
                         for site_upstream in /etc/unit/sites.enabled/*-upstream.json; do
                             ${_prefix} curl -X PUT --data-binary @${site_upstream} ${_unit_control}/upstreams
-                        done
-                    fi
-                    if compgen -G "/etc/unit/sites.enabled/*-application.json" >/dev/null ; then
-                        for site_application in /etc/unit/sites.enabled/*-application.json; do
-                            ${_prefix} curl -X PUT --data-binary @${site_application} ${_unit_control}/applications
                         done
                     fi
                     if compgen -G "/etc/unit/sites.enabled/*-listener.json" >/dev/null ; then
