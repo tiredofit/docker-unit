@@ -39,6 +39,7 @@ This will build a Docker Image for [Unit](https://unit.nginx.org), A high perfor
     - [Base Images used](#base-images-used)
     - [Core](#core)
     - [Logging](#logging)
+    - [Performance](#performance)
     - [Constraints](#constraints)
   - [Networking](#networking)
 - [Maintenance](#maintenance)
@@ -189,6 +190,15 @@ Be sure to view the following repositories to understand all the customizable op
 | `UNIT_LOG_ACCESS_PATH`   | Access log path                         | `${UNIT_LOG_PATH}` |
 | `UNIT_LOG_ACCESS_FILE`   | Access log filename                     | `access.log`       |
 
+#### Performance
+| Variable                           | Value                                                                     | Default  |
+| ---------------------------------- | ------------------------------------------------------------------------- | -------- |
+| `UNIT_APPLICATION_LIMIT_RECYCLE`   | Restart application process after (x) many requests                       | ``       |
+| `UNIT_APPLICATION_LIMIT_TIMEOUT`   | Timeout in seconds if process hangs before delivering 503 error to client | ``       |
+| `UNIT_APPLICATION_PROCESS_TYPE`    | Static or Dyanmic                                                         | `STATIC` |
+| `UNIT_APPLICATION_PROCESS_MAX`     | (dynamic) Max application processes to spawn                              | `1`      |
+| `UNIT_APPLICATION_PROCESS_SPARE`   | (dynamic) Max spare processes to spawn                                    | `1`      |
+| `UNIT_APPLICATION_PROCESS_TIMEOUT` | (dynamic) Timeout in seconds to phase out process                         | `20`     |
 
 #### Constraints
 | Variable                     | Value                          | Default      |

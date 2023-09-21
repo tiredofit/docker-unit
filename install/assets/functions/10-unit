@@ -110,6 +110,28 @@ EOF
 }
 
 unit_configure_site() {
+    _unit_configure_application() {
+        if [ "${UNIT_APPLICATION_PROCESS_TYPE,, }" = "dynamic" ] ; then
+            yq -iP '
+                        .*.processes.max=env(UNIT_APPLICATION_PROCESS_MAX) |
+                        .*.processes.spare=env(UNIT_APPLICATION_PROCESS_SPARE) |
+                        .*.processes.timeout=env(UNIT_APPLICATION_PROCESS_TIMEOUT)
+                ' -o json "${1}".json
+        fi
+
+        if [[ "${UNIT_APPLICATION_LIMIT_REQUEST_RECYCLE}" -ge 1 ]] ; then
+            yq -iP '
+                        .*.limits.requests=env(UNIT_APPLICATION_LIMIT_REQUEST_RECYCLE)
+                ' -o json "${1}".json
+        fi
+
+        if [[ "${UNIT_APPLICATION_LIMIT_TIMEOUT}" -ge 1 ]] ; then
+            yq -iP '
+                        .*.limits.timeout=env(UNIT_APPLICATION_LIMIT_TIMEOUT)
+                ' -o json "${1}".json
+        fi
+    }
+
     _unit_configure_site_default() {
         if [ -z "${UNIT_SITE_ENABLED}" ] && [ ! -f "/etc/unit/sites.available/default-listener.json" ] && [ ! -f "/etc/cont-init.d/20-unit-php" ] ; then
             UNIT_SITE_ENABLED=default
@@ -163,10 +185,18 @@ EOF
                 for config in /etc/unit/sites.available/*.json ; do
                     _unit_configure_site_targetted $(basename $config)
                 done
+
+                for application in /etc/unit/sites.available/*-application.json ; do
+                    _unit_configure_application "${application}"
+                done
             ;;
             *)
                 if compgen -G "/etc/unit/sites.available/${1}*.json" >/dev/null ; then
                     _unit_configure_site_targetted "${1}"
+                fi
+
+                if compgen -G "/etc/unit/sites.available/${1}-application.json" >/dev/null ; then
+                    _unit_configure_application /etc/unit/sites.available/"${1}"-application.json
                 fi
             ;;
         esac
