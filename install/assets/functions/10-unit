@@ -154,7 +154,6 @@ EOF
                                                             UNIT_WEBROOT
     }
 
-
     if [ -n "${1}" ]; then
         case "${1}" in
             default)
@@ -179,7 +178,6 @@ EOF
         fi
     fi
 }
-
 
 unit_create_sample_html() {
     if [ ! -f "${UNIT_WEBROOT}/index.html" ]; then
