@@ -1,10 +1,10 @@
 ARG DISTRO=alpine
-ARG DISTRO_VARIANT=3.15
+ARG DISTRO_VARIANT=3.18
 
 FROM docker.io/tiredofit/${DISTRO}:${DISTRO_VARIANT}
 LABEL maintainer="Dave Conroy (github.com/tiredofit)"
 
-ARG PHP_BASE=7.4
+ARG PHP_BASE=8.2
 ARG UNIT_VERSION
 
 ENV UNIT_VERSION=1.31.0-1 \
