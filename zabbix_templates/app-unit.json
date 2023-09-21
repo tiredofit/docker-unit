@@ -12,7 +12,7 @@
                 "uuid": "4efb058a767442c0b8eb0890c2975112",
                 "template": "Unit",
                 "name": "Unit",
-                "description": "Get metrics from Unit Webserver \nhttps://unit.nginx.org/usagestats/\n\nThis is designed specifically for https://github.com/tiredofit/docker-unit/ and its associated base images. Tested on Unit 1.31.0",
+                "description": "Get metrics from Unit Webserver \nhttps://unit.nginx.org/usagestats/\n\nThis is designed specifically for https://github.com/tiredofit/docker-unit/ and its associated base images. Tested on Unit 1.31.0\n\nTODO: LLD Discovery on Application Process and request information",
                 "groups": [
                     {
                         "name": "Templates/Applications"
@@ -91,6 +91,14 @@
                                 "tag": "Application",
                                 "value": "Unit"
                             }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "38ade3fdf4b0408faeb27465812194e5",
+                                "expression": "last(/Unit/proc.num[unitd,,,main])=0",
+                                "name": "Unit: Process is not running",
+                                "priority": "HIGH"
+                            }
                         ]
                     },
                     {
@@ -125,7 +133,13 @@
                         ],
                         "master_item": {
                             "key": "unit.get_statistics"
-                        }
+                        },
+                        "tags": [
+                            {
+                                "tag": "Application",
+                                "value": "Unit"
+                            }
+                        ]
                     },
                     {
                         "uuid": "c1ffd175e8ce4f30a000eb95daf8aa20",
@@ -145,7 +159,13 @@
                         ],
                         "master_item": {
                             "key": "unit.get_statistics"
-                        }
+                        },
+                        "tags": [
+                            {
+                                "tag": "Application",
+                                "value": "Unit"
+                            }
+                        ]
                     },
                     {
                         "uuid": "c522c377833744f0b32bd356084819af",
@@ -165,7 +185,13 @@
                         ],
                         "master_item": {
                             "key": "unit.get_statistics"
-                        }
+                        },
+                        "tags": [
+                            {
+                                "tag": "Application",
+                                "value": "Unit"
+                            }
+                        ]
                     },
                     {
                         "uuid": "9fbfc51a37ad4d11bd68861aae898c72",
@@ -185,7 +211,13 @@
                         ],
                         "master_item": {
                             "key": "unit.get_statistics"
-                        }
+                        },
+                        "tags": [
+                            {
+                                "tag": "Application",
+                                "value": "Unit"
+                            }
+                        ]
                     },
                     {
                         "uuid": "a76af1c6290744e6ae7b35a021fde5c2",
@@ -195,7 +227,22 @@
                         "delay": "30s",
                         "history": "0",
                         "trends": "0",
-                        "value_type": "TEXT"
+                        "value_type": "TEXT",
+                        "tags": [
+                            {
+                                "tag": "Application",
+                                "value": "Unit"
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "bdd509e700184dc3a5029b025f3ad5bc",
+                                "expression": "nodata(/Unit/unit.get_statistics,10m)=1",
+                                "name": "Unit: No statistics Received",
+                                "priority": "WARNING",
+                                "description": "Zabbix has not received data for items in the last 10m"
+                            }
+                        ]
                     },
                     {
                         "uuid": "34e58afff1904bc2a83cfb2dfbd56215",
@@ -215,7 +262,13 @@
                         ],
                         "master_item": {
                             "key": "unit.get_statistics"
-                        }
+                        },
+                        "tags": [
+                            {
+                                "tag": "Application",
+                                "value": "Unit"
+                            }
+                        ]
                     },
                     {
                         "uuid": "dbf9c2cb699f47a7a27cb87176a2f111",
@@ -230,6 +283,69 @@
                             {
                                 "tag": "Application",
                                 "value": "Unit"
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "28a6d31823f743c684ca4a6041c92cf3",
+                                "expression": "last(/Unit/unit.version,#1)<>last(/Unit/unit.version,#2) and length(last(/Unit/unit.version))>0",
+                                "name": "Unit: Version has changed (new version: {ITEM.VALUE})",
+                                "priority": "INFO",
+                                "description": "Unit version has changed. Ack to close",
+                                "manual_close": "YES"
+                            }
+                        ]
+                    }
+                ],
+                "discovery_rules": [
+                    {
+                        "uuid": "ccf472f613534f429d08ef071d433d97",
+                        "name": "Unit: Application Discovery",
+                        "type": "DEPENDENT",
+                        "key": "unit.application.discovery",
+                        "delay": "0",
+                        "item_prototypes": [
+                            {
+                                "uuid": "bdb794ea7696477b9b1a778f3026bd0e",
+                                "name": "Application \"{#APPLICATIONNAME}\": Process - Running",
+                                "type": "DEPENDENT",
+                                "key": "unit.application.process.running[{#APPLICATIONNAME}]",
+                                "delay": "0",
+                                "history": "7d",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.applications.wordpress.processes.running"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "unit.get_statistics"
+                                }
+                            }
+                        ],
+                        "master_item": {
+                            "key": "unit.get_statistics"
+                        },
+                        "lld_macro_paths": [
+                            {
+                                "lld_macro": "{#APPLICATIONNAME}",
+                                "path": "$.ApplicationName"
+                            }
+                        ],
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.applications"
+                                ]
+                            },
+                            {
+                                "type": "DISCARD_UNCHANGED_HEARTBEAT",
+                                "parameters": [
+                                    "1h"
+                                ]
                             }
                         ]
                     }
