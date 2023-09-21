@@ -29,7 +29,7 @@ RUN source assets/functions/00-container && \
         *) php_packages="php82-dev php82-embed php81-dev php81-embed" ; _php_config="./configure php --module=php81 --config=php-config81" ; _php_config2="./configure php --module=php82 --config=php-config82" ;  ;; \
     esac ; \
     sed -i "/www-data/d" /etc/group* && \
-    addgroup -S -g 82 ${UNIT_GROUP} && \
+    addgroup -S -g 82 "${UNIT_GROUP}" && \
     adduser -D -S -s /sbin/nologin \
             -h /var/lib/unit \
             -G "${UNIT_GROUP}" \
