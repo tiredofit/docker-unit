@@ -115,7 +115,7 @@ unit_configure_site() {
             yq -iP '
                         .*.processes.max=env(UNIT_APPLICATION_PROCESS_MAX) |
                         .*.processes.spare=env(UNIT_APPLICATION_PROCESS_SPARE) |
-                        .*.processes.timeout=env(UNIT_APPLICATION_PROCESS_TIMEOUT)
+                        .*.processes.idle_timeout=env(UNIT_APPLICATION_PROCESS_TIMEOUT)
                 ' -o json "${1}".json
         fi
 
