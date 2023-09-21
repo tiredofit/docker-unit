@@ -1,10 +1,10 @@
 ARG DISTRO=alpine
-ARG DISTRO_VARIANT=3.18
+ARG DISTRO_VARIANT=3.15
 
 FROM docker.io/tiredofit/${DISTRO}:${DISTRO_VARIANT}
 LABEL maintainer="Dave Conroy (github.com/tiredofit)"
 
-ARG PHP_BASE=8.2
+ARG PHP_BASE=7.4
 ARG UNIT_VERSION
 
 ENV UNIT_VERSION=1.31.0-1 \
@@ -20,12 +20,12 @@ RUN source assets/functions/00-container && \
     case "${PHP_BASE}" in \
        8.2 ) export php_abbrev="82";; \
        8.1 ) export php_abbrev="81";; \
-       8 ) export php_abbrev="8";; \
+       8.0 ) export php_abbrev="8";; \
        7.4 ) export php_abbrev="7";; \
        7.3 ) export php_abbrev="7";; \
     esac ; \
     case "$(cat /etc/os-release | grep VERSION_ID | cut -d = -f 2 | cut -d . -f 1,2 | cut -d _ -f 1)" in \
-        3.12 | 3.15 | 3.16 ) php_packages="php${php_abbrev}-dev php${php_abbrev}-embed" ; _php_config="./configure php --module=php${php_abbrev} --config=php-config${php-abbrev}" ;; \
+        3.12 | 3.15 | 3.16 ) php_packages="php${php_abbrev}-dev php${php_abbrev}-embed" ; _php_config="./configure php --module=php${php_abbrev} --config=php-config${php_abbrev}" ;; \
         *) php_packages="php82-dev php82-embed php81-dev php81-embed" ; _php_config="./configure php --module=php81 --config=php-config81" ; _php_config2="./configure php --module=php82 --config=php-config82" ;  ;; \
     esac ; \
     ${test} && \
@@ -44,14 +44,14 @@ RUN source assets/functions/00-container && \
                     build-base \
                     git \
                     linux-headers \
-	                nodejs \
+                    nodejs \
                     npm \
                     openssl-dev \
                     pcre-dev \
                     perl-dev \
-                	${php_packages} \
-                	python3-dev \
-                	ruby-dev \
+                    ${php_packages} \
+                    python3-dev \
+               	    ruby-dev \
                     && \
     \
     package install .unit-run-deps \
@@ -70,7 +70,7 @@ RUN source assets/functions/00-container && \
 		--log="/var/log/unit/unit.log" \
 		--mandir=/usr/src/unit.tmp \
 		--modulesdir="/usr/lib/unit/modules" \
-        --tmpdir=/tmp \
+                --tmpdir=/tmp \
 		--openssl \
 		--user="${UNIT_USER}" \
 		--group="${UNIT_GROUP}" \
@@ -83,7 +83,7 @@ RUN source assets/functions/00-container && \
     ./configure python --config=python3-config && \
     ./configure ruby && \
     make -j $(nproc) && \
-	make tests && \
+    make tests && \
     make install && \
     strip /usr/sbin/unitd && \
     package remove .unit-build-deps \
