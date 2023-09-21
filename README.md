@@ -36,7 +36,9 @@ This will build a Docker Image for [Unit](https://unit.nginx.org), A high perfor
   - [Persistent Storage](#persistent-storage)
   - [Environment Variables](#environment-variables)
     - [Base Images used](#base-images-used)
-    - [Container Options](#container-options)
+    - [Core](#core)
+    - [Logging](#logging)
+    - [Constraints](#constraints)
   - [Networking](#networking)
 - [Maintenance](#maintenance)
   - [Shell Access](#shell-access)
@@ -101,9 +103,9 @@ Images are built primarily for `amd64` architecture, and may also include builds
 
 ### Creating configuration
 
-This image expects that you place 3+ files into the `/etc/unit/sites.available` directory along with setting the variable `UNIT_SITE_ENABLED`.
+This image expects that you place files into the `/etc/unit/sites.available` directory along with setting the variable `UNIT_SITE_ENABLED`.
 
-- The image will look for the following files:
+- The image will look all or some of the following files:
   - `$UNIT_SITE_ENABLED-listener.json` - Configuration of the listening port, IP, and what to do upon recieving a connection
   - `$UNIT_SITE_ENABLED-uptream.json` - Configuration of the upstream to pass traffic to. This is an optional file and not used regularly
   - `$UNIT_SITE_ENABLED-route.json` - Configuration of route configuration for above listener. This dictates the files to respond to and how to route to an application
@@ -158,41 +160,49 @@ Be sure to view the following repositories to understand all the customizable op
 | [OS Base](https://github.com/tiredofit/docker-alpine/) | Customized Image based on Alpine Linux |
 
 
-#### Container Options
+#### Core
 
 | Variable                                | Value                                                | Default                  |
 | --------------------------------------- | ---------------------------------------------------- | ------------------------ |
-| `UNIT_APPLICATION_NAME`                 | This may be phased out                               | `Unit`                   |
-| `UNIT_DISCARD_UNSAFE_FIELDS`            | Disable serving unsafe fields                        | `TRUE`                   |
-| `UNIT_ENABLE_APPLICATION_CONFIGURATION` | This may be phased out                               | `TRUE`                   |
+| `UNIT_ENABLE_APPLICATION_CONFIGURATION` | This allows for auto configuration                   | `TRUE`                   |
 | `UNIT_ENABLE_CREATE_SAMPLE_HTML`        | Create sample index.html file if not existing        | `TRUE`                   |
-| `ENABLE_SERVER_VERSION`                 | Reveal Unit version in headers                       | `TRUE`                   |
-| `UNIT_FORCE_RESET_PERMISSIONS`          | Reset permissions of UNIT_WEBROOT each startup       | `TRUE`                   |
-| `UNIT_LISTEN_PORT`                      | Website listen port                                  | `80`                     |
-| `UNIT_LOG_FILE`                         | Main application log file                            | `unit.log`               |
-| `UNIT_LOG_PATH`                         | Where log files are stored                           | `/var/log/unit/`         |
-| `UNIT_LOG_ROUTES`                       | Log route information                                | `FALSE`                  |
-| `UNIT_LOG_TYPE`                         | Unit log type `file` `console`                       | `FILE`                   |
-| `UNIT_LOG_ACCESS_FILE`                  | Access log filename                                  | `access.log`             |
-| `UNIT_LOG_ACCESS_FORMAT`                | Access log format `standard` or `json`               | `STANDARD`               |
-| `UNIT_LOG_ACCESS_PATH`                  | Access log path                                      | `${UNIT_LOG_PATH}`       |
-| `UNIT_LOG_ACCESS_TYPE`                  | Access log type `file` `console` `none`              | `FILE`                   |
-| `UNIT_MAX_BODY_SIZE`                    | Max body size in bytes                               | `8388608`                |
-| `UNIT_TIMEOUT_BODY_READ`                | Body read timeout in seconds                         | `30`                     |
-| `UNIT_TIMEOUT_BODY_SEND`                | Body send timeout in seconds                         | `30`                     |
-| `UNIT_TIMEOUT_HEADER_READ`              | Header read timeout in seconds                       | `30`                     |
-| `UNIT_TIMEOUT_IDLE`                     | Idle time in seconds                                 | `30`                     |
-| `UNIT_WEBROOT`                          | Where website is served from                         | `/www/html/`             |
-| `UNIT_LISTEN_IP`                        | Website Listen IP                                    | `0.0.0.0`                |
 | `UNIT_CONTROL_TYPE`                     | Socket type `ip` or `socket`                         | `SOCKET`                 |
 | `UNIT_CONTROL_SOCKET_NAME`              | Socket Name                                          | `control.unit.sock`      |
 | `UNIT_CONTROL_SOCKET_PATH`              | Socket Path                                          | `/run/unit/`             |
 | `UNIT_CONTROL_IP`                       | Control IP - Warning, do not expose to the internet! | `127.0.0.1`              |
 | `UNIT_CONTROL_PORT`                     | Control Port                                         | `8080`                   |
-| `UNIT_TMP_PATH`                         | Temporary Files Path                                 | `/tmp`                   |
-| `UNIT_STATE_PATH`                       | Configuration State                                  | `/var/lib/unit/`         |
+| `UNIT_LISTEN_IP`                        | Website Listen IP                                    | `0.0.0.0`                |
+| `UNIT_LISTEN_PORT`                      | Website listen port                                  | `80`                     |
 | `UNIT_MODULE_PATH`                      | Customizable Module Path                             | `/usr/lib/unit/modules/` |
-| `UNIT_SETUP_TYPE`                       | This may be phased out.                              | `AUTO`                   |
+| `UNIT_STATE_PATH`                       | Configuration State                                  | `/var/lib/unit/`         |
+| `UNIT_TMP_PATH`                         | Temporary Files Path                                 | `/tmp`                   |
+| `UNIT_WEBROOT`                          | Where website is served from                         | `/www/html/`             |
+
+#### Logging
+
+| Variable                 | Value                                   | Default            |
+| ------------------------ | --------------------------------------- | ------------------ |
+| `UNIT_LOG_TYPE`          | Unit log type `file` `console`          | `FILE`             |
+| `UNIT_LOG_PATH`          | Where log files are stored              | `/var/log/unit/`   |
+| `UNIT_LOG_FILE`          | Main application log file               | `unit.log`         |
+| `UNIT_LOG_ROUTES`        | Log route information                   | `FALSE`            |
+| `UNIT_LOG_ACCESS_TYPE`   | Access log type `file` `console` `none` | `FILE`             |
+| `UNIT_LOG_ACCESS_FORMAT` | Access log format `standard` or `json`  | `STANDARD`         |
+| `UNIT_LOG_ACCESS_PATH`   | Access log path                         | `${UNIT_LOG_PATH}` |
+| `UNIT_LOG_ACCESS_FILE`   | Access log filename                     | `access.log`       |
+
+
+#### Constraints
+| Variable                     | Value                          | Default   |
+| ---------------------------- | ------------------------------ | --------- |
+| `UNIT_DISCARD_UNSAFE_FIELDS` | Disable serving unsafe fields  | `TRUE`    |
+| `UNIT_ENABLE_SERVER_VERSION` | Reveal Unit version in headers | `TRUE`    |
+| `UNIT_MAX_BODY_SIZE`         | Max body size in bytes         | `8388608` |
+| `UNIT_TIMEOUT_BODY_READ`     | Body read timeout in seconds   | `30`      |
+| `UNIT_TIMEOUT_BODY_SEND`     | Body send timeout in seconds   | `30`      |
+| `UNIT_TIMEOUT_HEADER_READ`   | Header read timeout in seconds | `30`      |
+| `UNIT_TIMEOUT_IDLE`          | Idle time in seconds           | `30`      |
+
 
 ### Networking
 
