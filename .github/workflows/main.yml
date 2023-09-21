@@ -125,6 +125,7 @@ jobs:
           build-args: |
              DISTRO=${{ env.DISTRO }}
              DISTRO_VARIANT=${{ env.DISTRO_VARIANT }}
+             PHP_BASE=${{ env.PHP_BASE }}
 
 #      - name: Update Docker Hub Information
 #        if: github.event_name != 'pull_request'
@@ -248,6 +249,7 @@ jobs:
           build-args: |
              DISTRO=${{ env.DISTRO }}
              DISTRO_VARIANT=${{ env.DISTRO_VARIANT }}
+             PHP_BASE=${{ env.PHP_BASE }}
 
 #      - name: Update Docker Hub Information
 #        if: github.event_name != 'pull_request'
@@ -374,6 +376,7 @@ jobs:
           build-args: |
              DISTRO=${{ env.DISTRO }}
              DISTRO_VARIANT=${{ env.DISTRO_VARIANT }}
+             PHP_BASE=${{ env.PHP_BASE }}
 
 #      - name: Update Docker Hub Information
 #        if: github.event_name != 'pull_request'
@@ -498,6 +501,7 @@ jobs:
           build-args: |
              DISTRO=${{ env.DISTRO }}
              DISTRO_VARIANT=${{ env.DISTRO_VARIANT }}
+             PHP_BASE=${{ env.PHP_BASE }}
 
 #      - name: Update Docker Hub Information
 #        if: github.event_name != 'pull_request'
@@ -622,6 +626,7 @@ jobs:
           build-args: |
              DISTRO=${{ env.DISTRO }}
              DISTRO_VARIANT=${{ env.DISTRO_VARIANT }}
+             PHP_BASE=${{ env.PHP_BASE }}
 
 #      - name: Update Docker Hub Information
 #        if: github.event_name != 'pull_request'
