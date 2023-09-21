@@ -16,7 +16,6 @@ if [ ! -f "/tmp/.container/container-restart" ] ; then
         else
             print_notice "Not configurating Website configuration files"
         fi
-    fi
 fi
 
 liftoff
