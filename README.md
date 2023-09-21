@@ -13,6 +13,8 @@ This will build a Docker Image for [Unit](https://unit.nginx.org), A high perfor
 
 - Supports various Node, Perl, PHP, Python, Ruby runtime engines
 - Auto configuration generation and import
+- Metrics collection
+- Log Shipping support
 
 
 ## Maintainer
