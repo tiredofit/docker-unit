@@ -143,7 +143,7 @@ unit_configure_site() {
             yq -iP  '
                         .*.forwarded.protocol="X-Forwarded-Proto" |
                         .*.forwarded.source=['$(echo "${xforward_proto_prepared}" | sed "s|^,||g")']
-                    ' -o json "${1}".json
+                    ' -o json "${1}"
         fi
     }
 
@@ -169,7 +169,7 @@ EOF
             #            .listeners."'$(echo "${UNIT_LISTEN_IP}:${UNIT_LISTEN_PORT}")'".pass="routes" |
             #            .routes.action.share = "'$(echo "${UNIT_WEBROOT}")'/$uri"
             #        ' -o json > /etc/unit/sites.available/default.json
-            _unit_configure_listener /etc/unit/sites.available/default-listener
+            _unit_configure_listener /etc/unit/sites.available/default-listener.json
         fi
     }
 
