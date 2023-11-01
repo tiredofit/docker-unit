@@ -7,7 +7,7 @@ LABEL maintainer="Dave Conroy (github.com/tiredofit)"
 ARG PHP_BASE=8.2
 ARG UNIT_VERSION
 
-ENV UNIT_VERSION=1.31.0-1 \
+ENV UNIT_VERSION=1.31.1-1 \
     UNIT_USER=unit \
     UNIT_GROUP=www-data \
     UNIT_WEBROOT=/www/html \
