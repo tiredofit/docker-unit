@@ -80,7 +80,7 @@ The following image tags are available along with their tagged release based on 
 | latest      | 18        | 5.36      | 8.2, 8.1 | 3.11        | 3.2       | `:latest`      |
 | latest      | 18        | 5.36      | 8.2, 8.1 | 3.11        | 3.2       | `:alpine`      |
 | edge        | 18        | 5.38      | 8.2, 8.1 | 3.11        | 3.2       | `:alpine-edge` |
-| 3.18        | 18        | 5.36      | 8.2, 8.1 | 3.11        | 3.2       | `:alpine-3.18` |
+| 3.19        | 20        | 5.36      | 8.2, 8.1 | 3.11        | 3.2       | `:alpine-3.19` |
 | 3.16        | 16        | 5.34      | 8.0      | 3.10        | 3.1       | `:alpine-3.16` |
 | 3.15        | 16        | 5.34      | 7.4      | 3.9         | 3.0       | `:alpine-3.15` |
 | 3.12        | 12        | 5.30      | 7.3      | 3.8         | 2.7       | `:alpine-3.12` |
@@ -247,17 +247,17 @@ Once inside the container - there is a utility `unit-control` that will allow yo
 These images were built to serve a specific need in a production environment and gradually have had more functionality added based on requests from the community.
 ### Usage
 - The [Discussions board](../../discussions) is a great place for working with the community on tips and tricks of using this image.
-- Consider [sponsoring me](https://github.com/sponsors/tiredofit) for personalized support.
+- [Sponsor me](https://tiredofit.ca/sponsor) for personalized support.
 ### Bugfixes
 - Please, submit a [Bug Report](issues/new) if something isn't working as expected. I'll do my best to issue a fix in short order.
 
 ### Feature Requests
 - Feel free to submit a feature request, however there is no guarantee that it will be added, or at what timeline.
-- Consider [sponsoring me](https://github.com/sponsors/tiredofit) regarding development of features.
+- [Sponsor me](https://tiredofit.ca/sponsor) regarding development of features.
 
 ### Updates
 - Best effort to track upstream changes, More priority if I am actively using the image in a production environment.
-- Consider [sponsoring me](https://github.com/sponsors/tiredofit) for up to date releases.
+- [Sponsor me](https://tiredofit.ca/sponsor) for up to date releases.
 
 ## License
 MIT. See [LICENSE](LICENSE) for more details.

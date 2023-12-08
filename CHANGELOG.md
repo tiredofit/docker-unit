@@ -1,3 +1,9 @@
+## 1.0.2 2023-12-08 <dave at tiredofit dot ca>
+
+   ### Added
+      - Phease out alpine 3.18 builds and swap out 3.19
+
+
 ## 1.0.1 2023-10-31 <dave at tiredofit dot ca>
 
    ### Added
